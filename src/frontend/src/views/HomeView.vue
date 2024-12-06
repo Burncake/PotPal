@@ -1,12 +1,27 @@
-<script setup>
-import Carousel from '../components/MainCarousel.vue'
-import NewProducts from '../components/NewProducts.vue'
-// import Product from '../components/ProductItem.vue'
-</script>
-
 <template>
-  <main>
-    <Carousel />
-    <NewProducts title="New Products" />
-  </main>
+  <HomeCarosual />
+  <HomeFeatures />
+  <HomeFeaturedProducts/>
+  <HomeLatestProducts/>
+  <HomeSwiper/>
+  <HomeTestimonials/>
 </template>
+<script>
+import HomeCarosual from '../components/HomeCarosual.vue';
+import HomeFeatures from '../components/HomeFeatures.vue';
+import HomeFeaturedProducts from '../components/HomeFeaturedProducts.vue';
+import HomeLatestProducts from '../components/HomeLatestProducts.vue';
+import HomeTestimonials from '../components/HomeTestimonials.vue';
+import HomeSwiper from '../components/HomeSwiper.vue';
+export default {
+name: 'HomePage',
+components: {
+  HomeCarosual,
+  HomeFeatures,
+  HomeFeaturedProducts,
+  HomeLatestProducts,
+  HomeTestimonials,
+  HomeSwiper
+}
+}
+</script>
