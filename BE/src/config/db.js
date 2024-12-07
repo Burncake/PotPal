@@ -1,27 +1,15 @@
-// ./config/dbConfig.js
+const knex = require('knex');
+const knexConfig = require('../../knexfile');
+// Sử dụng cấu hình 'development' từ knexfile.js
+const db = knex(knexConfig.development);
 
-require('dotenv').config(); // Tải các biến môi trường từ .env file
-
-const mysql = require('mysql2');
-
-// Cấu hình kết nối với MySQL
-const dbConfig = {
-    host: process.env.DB_HOST,// Địa chỉ host (ví dụ: localhost)
-    user: process.env.DB_USER,    // Tên người dùng MySQL
-    password: process.env.DB_PASSWORD, // Mật khẩu người dùng
-    database: process.env.DB_NAME, // Tên cơ sở dữ liệu
-};
-
-// Tạo kết nối MySQL
-const connection = mysql.createConnection(db);
-
-// Kiểm tra kết nối
-connection.connect((err) => {
-    if (err) {
-        console.error('Lỗi kết nối cơ sở dữ liệu: ', err);
-        return;
+const checkDbConnection = async () => {
+    try {
+        await db.raw('SELECT 1');
+        console.log('Database connection successful');
+    } catch (err) {
+        console.error('Database connection failed:', err.message);
+        process.exit(1);
     }
-    console.log('Kết nối thành công đến cơ sở dữ liệu MySQL');
-});
-
-module.exports = connection;
+};
+module.exports = {db, checkDbConnection};

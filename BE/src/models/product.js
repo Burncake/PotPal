@@ -134,7 +134,7 @@ function getLaptopById(productID) {
 module.exports = { Product, getAllLaptops, getLaptopById };
 
 
-const db = require('../config/potpal');
+const db = require('../config/db');
 
 // Lấy tất cả sản phẩm
 exports.getProducts = () => {
