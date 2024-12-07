@@ -28,7 +28,7 @@ const routes = [
     component: ContactPage,
   },
   {
-    path: '/category/:category',
+    path: '/category/:catID',
     name: 'ProductCategory',
     component: ProductCategory,
   },

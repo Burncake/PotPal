@@ -1,21 +1,17 @@
 <template>
   <div class="product-category-container py-5">
     <div class="container">
-      <h2 class="text-center mb-4 text-capitalize">Products in {{ category }}</h2>
+      <h2 class="text-center mb-4 text-capitalize">Products in {{ category.catName }}</h2>
       <div class="border-bottom mb-5"></div>
       <div class="row">
         <div v-for="(product, index) in products" :key="index" class="col-md-3 mb-5">
           <div class="card p-3 h-100 border-0 shadow-sm">
             <div class="card-img">
-              <img :src="product.image" alt="Product Image">
+              <img :src="product.mainImage" alt="Product Image">
             </div>
             <div class="card-body align-self-bottom">
-              <h6 class="card-title"><router-link :to="'/product/' + product.id">{{ product.title }}</router-link></h6>
+              <h6 class="card-title"><router-link :to="'/product/' + product.prodID">{{ product.prodName }}</router-link></h6>
               <p class="card-text p-0 mb-0 mt-3"><strong>Price: ${{ product.price }}</strong></p>
-              <!-- Display star rating -->
-              <div class="star-rating p-0 m-0">
-                {{ generateStarRating(product.rating.rate) }} ({{ product.rating.count }})
-              </div>
             </div>
           </div>
         </div>
@@ -28,42 +24,37 @@
 export default {
   data() {
     return {
-      category: '',
+      category: {}, 
       products: []
     };
   },
   async created() {
-    this.category = this.$route.params.category;
-    await this.fetchData();
+    this.catID = this.$route.params.catID;
+    await this.fetchCategoryAndProducts();
   },
   watch: {
-    '$route.params.category': 'fetchData'
+    '$route.params.catID': 'fetchCategoryAndProducts'
+  },
+  mounted() {
+    this.fetchCategoryAndProducts();
   },
   methods: {
-    async fetchData() {
+    async fetchCategoryAndProducts() {
       try {
-        this.category = this.$route.params.category;
-        let response = await fetch(`https://fakestoreapi.com/products/category/${this.$route.params.category}`);
-        if (response.ok) {
-          let data = await response.json();
-          this.products = data;
-        } else {
-          console.error('Error fetching products:', response.status);
-        }
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    },
-    generateStarRating(rating) {
-      const roundedRating = Math.round(rating * 2) / 2;
-      const fullStars = Math.floor(roundedRating);
-      const halfStar = roundedRating % 1 === 0.5;
-      const stars = '⭐'.repeat(fullStars);
-      const halfStarSymbol = halfStar ? '⭐' : '';
+        const categoryId = this.$route.params.catID;
+        
+        const categoryResponse = await fetch(`https://6754193836bcd1eec85023b2.mockapi.io/api/category/${categoryId}`);
+        const categoryData = await categoryResponse.json();
+        this.category = categoryData;
 
-      return `${stars}${halfStarSymbol}`;
+        const productsResponse = await fetch(`https://6754193836bcd1eec85023b2.mockapi.io/api/products?catID=${categoryId}`);
+        const productsData = await productsResponse.json();
+        this.products = productsData;
+      } catch (error) {
+        console.error('Error fetching category or products:', error);
+      }
     }
-  },
+  }
 };
 </script>
   

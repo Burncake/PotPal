@@ -4,41 +4,33 @@
             <div class="card-body">
                 <div v-if="product" class="row">
                     <div class="col-md-6">
-                        <img :src="product.image" class="img-fluid" alt="Product Image">
+                        <img :src="product.mainImage" class="img-fluid" alt="Product Image">
                     </div>
                     <div class="col-md-6">
-                        <h2>{{ product.title }}</h2>
+                        <h2>{{ product.prodName }}</h2>
                         <p><strong>Price:</strong> ${{ product.price }}</p>
-                        <p class="text-capitalize"><strong>Category:</strong> {{ product.category }}</p>
+                        <p class="text-capitalize"><strong>Category:</strong> {{ product.catID }}</p>
                         <p><strong>Description:</strong> {{ product.description }}</p>
-                        <div class="star-rating">
-                            {{ generateStarRating(product.rating.rate) }} ({{ product.rating.count }})
-                        </div>
                         <div class="mt-4">
                             <button class="btn btn-primary me-2">Buy Now</button>
                             <button class="btn btn-outline-primary">Add to Cart</button>
                         </div>
-
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Related Products Section -->
-        <h3 class="mt-5 mb-4 text-center">Related Products</h3>
-        <div class="border-bottom mb-5"></div>
-        <div class="row">
-            <div v-for="(relatedProduct, index) in relatedProducts" :key="index" class="col-md-3">
-                <div class="card p-3 h-100 shadow-sm border-0">
-                    <div class="card-img">
-                        <img :src="relatedProduct.image" class="img" alt="Related Product Image">
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title"><router-link :to="'/product/' + relatedProduct.id">{{ relatedProduct.title
-                        }}</router-link></h5>
-                        <p class="card-text"><strong>Price: ${{ relatedProduct.price }}</strong></p>
-                        <div class="star-rating">
-                            {{ generateStarRating(relatedProduct.rating.rate) }} ({{ relatedProduct.rating.count }})
+                <!-- Related Products Section -->
+                <h3 class="mt-5 mb-4 text-center">Related Products</h3>
+                <div class="border-bottom mb-5"></div>
+                <div class="row">
+                    <div v-for="(relatedProduct, index) in relatedProducts" :key="index" class="col-md-3">
+                        <div class="card p-3 h-100 shadow-sm border-0">
+                            <div class="card-img">
+                                <img :src="relatedProduct.mainImage" class="img" alt="Related Product Image">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title"><router-link :to="'/product/' + relatedProduct.prodID">{{ relatedProduct.prodName }}</router-link></h5>
+                                <p class="card-text"><strong>Price: ${{ relatedProduct.price }}</strong></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -64,8 +56,8 @@ export default {
 
             try {
                 let [productResponse, productsResponse] = await Promise.all([
-                    fetch(`https://fakestoreapi.com/products/${productId}`),
-                    fetch("https://fakestoreapi.com/products")
+                    fetch(`https://6754193836bcd1eec85023b2.mockapi.io/api/products/${productId}`),
+                    fetch("https://6754193836bcd1eec85023b2.mockapi.io/api/products")
                 ]);
 
                 if (productResponse.ok) {
@@ -76,7 +68,8 @@ export default {
 
                 if (productsResponse.ok) {
                     let data = await productsResponse.json();
-                    this.relatedProducts = data.filter(product => product.id !== parseInt(productId)).slice(0, 4);
+                    // Filter products that share the same category ID, excluding the current product
+                    this.relatedProducts = data.filter(product => product.catID === this.product.catID && product.prodID !== parseInt(productId)).slice(0, 4);
                 } else {
                     console.error("Error fetching related products:", productsResponse.status);
                 }
@@ -84,18 +77,10 @@ export default {
                 console.error("Error:", error);
             }
         },
-        generateStarRating(rating) {
-            const roundedRating = Math.round(rating * 2) / 2;
-            const stars = '⭐'.repeat(Math.floor(roundedRating));
-            const halfStar = (roundedRating % 1 !== 0) ? '⭐' : '';
-            return `${stars}${halfStar}`;
-        }
     },
     async created() {
         await this.fetchData();
     }
-
-
 }
 </script>
 
@@ -127,7 +112,6 @@ a:hover {
     position: relative;
     bottom: 0;
 }
-
 
 .img {
     width: 200px;

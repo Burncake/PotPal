@@ -1,3 +1,4 @@
+
 <template>
     <div class="container mt-5 pt-3">
         <h3 class="text-center mb-4">Featured Products</h3>
@@ -6,21 +7,19 @@
             <div v-for="(product, index) in featuredProducts" :key="index" class="col-md-3 mb-4">
                 <div class="card p-3 h-100 border-0 shadow-sm">
                     <div class="card-img">
-                        <img :src="product.image" alt="Product Image">
+                        <img :src="product.mainImage" alt="Product Image">
                     </div>
                     <div class="card-body align-self-bottom">
-                        <h6 class="card-title"><router-link :to="'/product/' + product.id">{{ product.title}}</router-link></h6>
+                        <h6 class="card-title"><router-link :to="'/product/' + product.prodID">{{ product.prodName}}</router-link></h6>
                         <p class="card-text p-0 mb-0 mt-3"><strong>Price: ${{ product.price }}</strong></p>
-                        <!-- Display star rating -->
-                        <div class="star-rating p-0 m-0">
-                            {{ generateStarRating(product.rating.rate) }} ({{ product.rating.count }})
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+
 
 <script>
 export default {
@@ -30,7 +29,7 @@ export default {
         };
     },
     mounted() {
-        fetch("https://fakestoreapi.com/products")
+        fetch("https://6754193836bcd1eec85023b2.mockapi.io/api/products")
             .then(response => response.json())
             .then(data => {
                 this.featuredProducts = data.slice(0, 4);
@@ -38,17 +37,6 @@ export default {
             .catch(error => {
                 console.error("Error fetching featured products:", error);
             });
-    },
-    methods: {
-        generateStarRating(rating) {
-            const roundedRating = Math.round(rating * 2) / 2;
-            const fullStars = Math.floor(roundedRating);
-            const halfStar = roundedRating % 1 === 0.5;
-            const stars = '⭐'.repeat(fullStars);
-            const halfStarSymbol = halfStar ? '⭐' : '';
-            
-            return `${stars}${halfStarSymbol}`;
-        }
     }
 }
 </script>

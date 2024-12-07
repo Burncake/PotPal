@@ -6,15 +6,17 @@
             <div v-for="(product, index) in lastestProducts" :key="index" class="col-md-3 mb-4">
                 <div class="card p-3 h-100 border-0 shadow-sm">
                     <div class="card-img">
-                        <img :src="product.image" alt="Product Image">
+                        <img :src="product.mainImage" alt="Product Image">
                     </div>
                     <div class="card-body align-self-bottom">
-                        <h6 class="card-title"><router-link :to="'/product/' + product.id">{{ product.title}}</router-link></h6>
+                        <h6 class="card-title"><router-link :to="'/product/' + product.prodID">{{ product.prodName}}</router-link></h6>
                         <p class="card-text p-0 mb-0 mt-3"><strong>Price: ${{ product.price }}</strong></p>
                         <!-- Display star rating -->
-                        <div class="star-rating p-0 m-0">
+                        <!--<
+                        div class="star-rating p-0 m-0">
                             {{ generateStarRating(product.rating.rate) }} ({{ product.rating.count }})
                         </div>
+                        -->
                     </div>
                 </div>
             </div>
@@ -30,7 +32,7 @@ export default {
         };
     },
     mounted() {
-        fetch("https://fakestoreapi.com/products")
+        fetch("https://6754193836bcd1eec85023b2.mockapi.io/api/products")
             .then(response => response.json())
             .then(data => {
                 this.lastestProducts = data;
@@ -39,6 +41,7 @@ export default {
                 console.error("Error fetching featured products:", error);
             });
     },
+    /*
     methods: {
         generateStarRating(rating) {
             const roundedRating = Math.round(rating * 2) / 2;
@@ -50,6 +53,7 @@ export default {
             return `${stars}${halfStarSymbol}`;
         }
     }
+    */
 }
 </script>
 

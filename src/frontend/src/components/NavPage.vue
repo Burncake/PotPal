@@ -27,12 +27,16 @@
               Categories
             </a>
             <ul class="dropdown-menu" id="categoryDropdown">
+              <!-- Display loading message or error if needed -->
+              <li v-if="loading">Loading categories...</li>
+              <li v-if="error">{{ errorMessage }}</li>
               <li v-for="(category, index) in categories" :key="index">
                 <router-link
                   class="dropdown-item text-capitalize"
-                  :to="'/category/' + category"
-                  >{{ category }}</router-link
+                  :to="'/category/' + category.catID"
                 >
+                  {{ category.catName }}
+                </router-link>
               </li>
             </ul>
           </div>
@@ -51,6 +55,9 @@ export default {
   data() {
     return {
       categories: [],
+      loading: false,
+      error: false,
+      errorMessage: '',
     }
   },
   mounted() {
@@ -58,13 +65,17 @@ export default {
   },
   methods: {
     fetchCategories() {
-      fetch('https://fakestoreapi.com/products/categories')
+      this.loading = true
+      fetch('https://6754193836bcd1eec85023b2.mockapi.io/api/category')
         .then((response) => response.json())
         .then((data) => {
           this.categories = data
+          this.loading = false
         })
         .catch((error) => {
-          console.error('Error fetching categories:', error)
+          this.error = true
+          this.errorMessage = 'Error fetching categories'
+          this.loading = false
         })
     },
   },
