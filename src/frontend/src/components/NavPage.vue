@@ -30,7 +30,7 @@
               <li v-for="(category, index) in categories" :key="index">
                 <router-link
                   class="dropdown-item text-capitalize"
-                  :to="'/PotPal/category/' + category"
+                  :to="'/category/' + category"
                   >{{ category }}</router-link
                 >
               </li>
