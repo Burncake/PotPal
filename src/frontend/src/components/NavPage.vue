@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg sticky-top navbar-light bg-white shadow-sm">
     <div class="container p-2">
-      <router-link class="navbar-brand" to="/PotPal">PotPal</router-link>
+      <router-link class="navbar-brand" to="/">PotPal</router-link>
       <button
         class="navbar-toggler"
         type="button"
@@ -15,7 +15,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav ms-auto">
-          <router-link class="nav-link" to="/PotPal">Home</router-link>
+          <router-link class="nav-link" to="/">Home</router-link>
           <div class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
