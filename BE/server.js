@@ -38,4 +38,8 @@ process.on('SIGINT', async () => {
     await db.destroy();
     console.log('Đã đóng kết nối cơ sở dữ liệu!');
     process.exit(0);
+<<<<<<< Updated upstream
 });
+=======
+});
+>>>>>>> Stashed changes

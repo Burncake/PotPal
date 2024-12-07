@@ -12,7 +12,19 @@ class Product {
         this.discount = discount;
     }
 
-    // Get all product details
+    // Phương thức để lấy Brand ID từ description (từ đầu tiên)
+    extractBrandID() {
+        return this.description.split(' ')[0];
+    }
+
+    // Phương thức để lấy phần còn lại của description (bỏ Brand ID)
+    extractRemainingDescription() {
+        const parts = this.description.split(' ');
+        parts.shift(); // Xóa phần tử đầu tiên (Brand ID)
+        return parts.join(' '); // Ghép lại phần còn lại thành chuỗi
+    }
+
+    // Lấy tất cả thông tin sản phẩm
     getInfo() {
         return {
             productID: this.productID,
@@ -24,6 +36,8 @@ class Product {
             imageUrl: this.imageUrl,
             available: this.available,
             discount: this.discount,
+            brandIDDescription: this.extractBrandID(),                      // Lấy Brand ID
+            remainingDescription: this.extractRemainingDescription(), // Phần còn lại của description
         };
     }
 
@@ -182,10 +196,9 @@ exports.searchProducts = async (keyword) => {
     return db('products').where('prodName', 'like', `%${keyword}%`);
 };
 
-// Lấy chi tiết sản phẩm kèm danh mục
+// Lấy chi tiết sản phẩm theo ID (không kèm danh mục)
 exports.getDetailProductById = (id) => {
     return db('products')
-        .join('categories', 'products.catID', 'categories.catID')
         .where('products.prodID', id)
         .first();
 };
@@ -212,4 +225,5 @@ exports.updateImageArray = (id, imageArray) => {
 exports.changeProductStatus = (id, status) => {
     return db('products').where('prodID', id).update({ prodStatus: status });
 };
+
 

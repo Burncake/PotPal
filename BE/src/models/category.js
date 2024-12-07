@@ -73,7 +73,7 @@ console.log("Subcategories:", mainCategory.getSubCategories().map((cat) => cat.g
 
 module.exports = { CategoryComponent, CategoryLeaf, CategoryComposite };
 
-const db = require('../config/potpal');
+const db = require('../config/db');
 
 // Lấy tất cả danh mục
 exports.getCategories = () => {
