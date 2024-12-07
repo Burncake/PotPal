@@ -1,53 +1,52 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '../views/HomeView.vue';
-import AboutPage from '../views/AboutView.vue';
-import ProductDetailsPage from '../views/ProductDetailsPage.vue';
-import ContactPage from '../views/ContactPage.vue';
-import ProductCategory from '../views/ProductCategory.vue';
+import HomePage from '../views/HomeView.vue'
+import AboutPage from '../views/AboutView.vue'
+import ProductDetailsPage from '../views/ProductDetailsPage.vue'
+import ContactPage from '../views/ContactPage.vue'
+import ProductCategory from '../views/ProductCategory.vue'
 import LoginView from '../views/LoginView.vue'
-import SignupView from '../views/SignupView.vue'
+import SignupView from '../views/RegisterView.vue'
 const routes = [
   {
-    path: '/PotPal',
+    path: '/',
     name: 'home',
-    component: HomePage
+    component: HomePage,
   },
   {
-    path: '/PotPal/about',
+    path: '/about',
     name: 'AboutPage',
-    component: AboutPage
+    component: AboutPage,
   },
   {
-    path: '/PotPal/product/:id',
+    path: '/product/:id',
     name: 'productDetails',
-    component: ProductDetailsPage
+    component: ProductDetailsPage,
   },
   {
-    path: '/PotPal/contact',
+    path: '/contact',
     name: 'ContactPage',
-    component: ContactPage
+    component: ContactPage,
   },
   {
-    path: '/PotPal/category/:category',
+    path: '/category/:category',
     name: 'ProductCategory',
-    component: ProductCategory
+    component: ProductCategory,
   },
   {
-    path: '/PotPal/login',
+    path: '/login',
     name: 'login',
     component: LoginView,
   },
   {
-    path: '/PotPal/register',
+    path: '/register',
     name: 'register',
     component: SignupView,
   },
-
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 })
 
 export default router

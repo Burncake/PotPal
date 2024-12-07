@@ -27,10 +27,6 @@ export default {
         this.message = error.response.data.message
       }
     },
-
-    reload(page) {
-      window.location.href = '/' + page
-    },
   },
 }
 </script>
@@ -86,6 +82,7 @@ export default {
 
       <!-- Email input -->
       <div data-mdb-input-init class="form-outline mb-4">
+        <label class="form-label" for="loginName">Email or username</label>
         <input
           type="text"
           id="loginName"
@@ -94,11 +91,11 @@ export default {
           v-model="username"
           required
         />
-        <label class="form-label" for="loginName">Email or username</label>
       </div>
 
       <!-- Password input -->
       <div data-mdb-input-init class="form-outline mb-4">
+        <label class="form-label" for="loginPassword">Password</label>
         <input
           type="password"
           id="loginPassword"
@@ -107,7 +104,6 @@ export default {
           v-model="password"
           required
         />
-        <label class="form-label" for="loginPassword">Password</label>
       </div>
 
       <!-- 2 column grid layout -->
@@ -131,19 +127,18 @@ export default {
       </div>
 
       <!-- Submit button -->
-      <button type="submit" data-mdb-ripple-init class="btn btn-primary btn-block mb-4">
-        Sign in
-      </button>
-
+      <div class="text-center">
+        <button type="submit" data-mdb-ripple-init class="btn btn-primary btn-block mb-4">
+          Sign in
+        </button>
+      </div>
       <!-- Register buttons -->
 
       <div class="text-center">
         <p>
           Not a member?
 
-          <RouterLink class="dropdown-item" to="/register"
-            ><a href="" @click.prevent="reload('register')">Sign up</a></RouterLink
-          >
+          <RouterLink class="dropdown-item" to="/register"><a href="">Sign up</a></RouterLink>
         </p>
       </div>
     </form>

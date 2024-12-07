@@ -45,9 +45,9 @@ export default {
         this.message = error.response.data.message
       }
     },
-    reload(page) {
-      window.location.href = '/' + page
-    },
+    // reload(page) {
+    //   window.location.href = '/' + page
+    // },
   },
 }
 </script>
@@ -97,28 +97,29 @@ export default {
 
       <!-- Name input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <input type="text" id="registerName" class="form-control" v-model="name" required />
         <label class="form-label" for="registerName">Name</label>
+        <input type="text" id="registerName" class="form-control" v-model="name" required />
       </div>
 
       <!-- Username input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <input type="text" id="registerUsername" class="form-control" v-model="username" required />
         <label class="form-label" for="registerUsername">Username</label>
+        <input type="text" id="registerUsername" class="form-control" v-model="username" required />
       </div>
 
       <!-- Email input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <input type="email" id="registerEmail" class="form-control" v-model="email" required />
         <label class="form-label" for="registerEmail">Email</label>
+        <input type="email" id="registerEmail" class="form-control" v-model="email" required />
       </div>
       <!--DOB input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <input type="date" id="registerDob" class="form-control" v-model="dob" />
         <label class="form-label" for="registerDob">Date of birth</label>
+        <input type="date" id="registerDob" class="form-control" v-model="dob" />
       </div>
       <!-- Password input -->
       <div data-mdb-input-init class="form-outline mb-4">
+        <label class="form-label" for="registerPassword">Password</label>
         <input
           type="password"
           id="registerPassword"
@@ -126,11 +127,11 @@ export default {
           v-model="password"
           required
         />
-        <label class="form-label" for="registerPassword">Password</label>
       </div>
 
       <!-- Repeat Password input -->
       <div data-mdb-input-init class="form-outline mb-4">
+        <label class="form-label" for="registerRepeatPassword">Repeat password</label>
         <input
           type="password"
           id="registerRepeatPassword"
@@ -138,7 +139,6 @@ export default {
           required
           v-model="repassword"
         />
-        <label class="form-label" for="registerRepeatPassword">Repeat password</label>
       </div>
       <input type="hidden" name="Permission" value="1" />
 
@@ -163,17 +163,16 @@ export default {
       <!-- Submit button -->
 
       <!-- {{!-- <button type="submit" class="btn btn-primary">Submit</button> --}} -->
-      <button type="submit" data-mdb-ripple-init class="btn btn-primary btn-block mb-3">
-        Sign up
-      </button>
-
+      <div class="text-center">
+        <button type="submit" data-mdb-ripple-init class="btn btn-primary btn-block mb-3">
+          Sign up
+        </button>
+      </div>
       <div class="text-center">
         <p>
           Have an account?
 
-          <RouterLink class="dropdown-item" to="/login" @click.prevent="reload('login')"
-            ><a href="">Log in</a></RouterLink
-          >
+          <RouterLink class="dropdown-item" to="/login"><a href="">Log in</a></RouterLink>
         </p>
       </div>
     </form>
