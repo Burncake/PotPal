@@ -4,6 +4,7 @@ import AboutPage from '../views/AboutView.vue'
 import ProductDetailsPage from '../views/ProductDetailsPage.vue'
 import ContactPage from '../views/ContactPage.vue'
 import ProductCategory from '../views/ProductCategory.vue'
+import SearchRes from '../views/SearchRes.vue'
 import LoginView from '../views/LoginView.vue'
 import SignupView from '../views/RegisterView.vue'
 const routes = [
@@ -41,6 +42,11 @@ const routes = [
     path: '/register',
     name: 'register',
     component: SignupView,
+  },
+  {
+    path: '/search',
+    name: 'SearchRes',
+    component: SearchRes,
   },
 ]
 
