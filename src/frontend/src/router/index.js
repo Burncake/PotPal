@@ -45,17 +45,16 @@ const routes = [
     component: SignupView,
   },
   {
-<<<<<<< HEAD
     path: '/admin/products',
     name: 'admin',
     component: AdminView,
-  }
-=======
+  },
+  
+  {
     path: '/search',
     name: 'SearchRes',
     component: SearchRes,
   },
->>>>>>> 5a4113a18381b3602658b2570f9f344e507183aa
 ]
 
 const router = createRouter({
