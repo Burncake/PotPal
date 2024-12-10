@@ -3,8 +3,20 @@
     <div class="container">
       <h2 class="text-center mb-4 text-capitalize">Searched Products</h2>
       <div class="border-bottom mb-5"></div>
+      <!-- Filter Section -->
+      <div class="mb-4 d-flex justify-content-center flex-column align-items-center">
+        <label for="price-range" class="mb-2">Filter by Price</label>
+        <select id="price-range" v-model="selectedPriceRange" @change="applyFilters" class="form-select w-auto">
+          <option value="">All Prices</option>
+          <option value="0-1000">0 - 1000$</option>
+          <option value="1000-2000">1000 - 2000$</option>
+          <option value="2000-3000">2000 - 3000$</option>
+          <option value="3000+">> 3000$</option>
+        </select>
+      </div>
+      <!-- Product Grid -->
       <div class="row">
-        <div v-for="(product, index) in searchedProd" :key="index" class="col-md-3 mb-5">
+        <div v-for="(product, index) in filteredProd" :key="index" class="col-md-3 mb-5">
           <div class="card p-3 h-100 border-0 shadow-sm">
             <div class="card-img">
               <img :src="product.mainImage" alt="Product Image" />
@@ -28,47 +40,99 @@
 export default {
   data() {
     return {
-      products: [],
-      searchedProd: [],
-    }
-  },
-  async created() {
-    // this.catID = this.$route.params.catID
+      products: [], // Danh sách tất cả sản phẩm
+      searchedProd: [], // Sản phẩm khớp với tìm kiếm
+      filteredProd: [], // Sản phẩm khớp với bộ lọc
+      selectedPriceRange: "",
+    };
   },
   watch: {
     '$route.query.pattern'(newPattern) {
-      this.search(newPattern)
+      this.search(newPattern);
+    },
+    '$route.query.price'(newPriceRange) {
+      this.selectedPriceRange = newPriceRange;
+      this.filterByPrice(newPriceRange);
     },
   },
   async mounted() {
-    await this.fetchProducts()
-    const pattern = this.$route.query.pattern
-    console.log(pattern)
-    this.search(pattern)
+    await this.fetchProducts();
+    const pattern = this.$route.query.pattern || '';
+    const priceRange = this.$route.query.price || '';
+    this.selectedPriceRange = priceRange;
+    this.search(pattern);
   },
   methods: {
     async fetchProducts() {
       try {
         const productsResponse = await fetch(
-          `https://6754193836bcd1eec85023b2.mockapi.io/api/products`,
-        )
-        const productsData = await productsResponse.json()
-        this.products = productsData
+          `https://6754193836bcd1eec85023b2.mockapi.io/api/products`
+        );
+        const productsData = await productsResponse.json();
+        this.products = productsData;
       } catch (error) {
-        console.error('Error fetching category or products:', error)
+        console.error('Error fetching products:', error);
       }
     },
     search(pattern) {
-      if (pattern === '') {
-        this.searchedProd = this.products
-        return
+      if (!pattern) {
+        this.searchedProd = this.products;
+      } else {
+        const regex = new RegExp(pattern, 'i');
+        this.searchedProd = this.products.filter((item) =>
+          regex.test(item.prodName)
+        );
       }
-      const regex = new RegExp(pattern, 'i')
+      this.filterByPrice(this.selectedPriceRange);
+    },
+    applyFilters() {
+      const priceRange = this.selectedPriceRange;
 
-      this.searchedProd = this.products.filter((item) => regex.test(item.prodName))
+      // Cập nhật query của URL
+      if (priceRange) {
+        this.$router.push({
+          path: this.$route.path,
+          query: {
+            ...this.$route.query,
+            price: priceRange,
+          },
+        });
+      } else {
+        this.$router.push({
+          path: this.$route.path,
+          query: {
+            ...this.$route.query,
+            price: undefined,
+          },
+        });
+      }
+
+      this.filterByPrice(priceRange);
+    },
+    filterByPrice(priceRange) {
+      if (!priceRange) {
+        this.filteredProd = this.searchedProd; // Hiển thị tất cả searchedProd nếu không có bộ lọc
+        return;
+      }
+
+      if (priceRange === '3000+') {
+        this.filteredProd = this.searchedProd.filter(
+          (product) => parseFloat(product.price) > 3000
+        );
+      } else {
+        const [minPrice, maxPrice] = priceRange.split('-').map(Number);
+        this.filteredProd = this.searchedProd.filter((product) => {
+          const price = parseFloat(product.price);
+          if (maxPrice) {
+            return price >= minPrice && price < maxPrice;
+          } else {
+            return price >= minPrice;
+          }
+        });
+      }
     },
   },
-}
+};
 </script>
 
 <style scoped>
