@@ -5,7 +5,7 @@ const db = knex(knexConfig.development);
 
 const checkDbConnection = async () => {
     try {
-        await db.raw('SELECT 0');
+        await db.raw('SELECT 1');
         console.log('Database connection successful');
     } catch (err) {
         console.error('Database connection failed:', err.message);

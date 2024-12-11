@@ -1,6 +1,4 @@
-// src/models/category.js
-
-// Abstract base class for Category
+const {db} = require('../config/db');
 class CategoryComponent {
     constructor(categoryID, categoryName, description) {
         this.categoryID = categoryID;
@@ -21,14 +19,12 @@ class CategoryComponent {
         return this.description;
     }
 }
-
 // CategoryLeaf: Represents individual (leaf) categories with no subcategories
 class CategoryLeaf extends CategoryComponent {
     constructor(categoryID, categoryName, description) {
         super(categoryID, categoryName, description);
     }
 }
-
 // CategoryComposite: Represents categories with subcategories
 class CategoryComposite extends CategoryComponent {
     constructor(categoryID, categoryName, description) {
@@ -58,95 +54,97 @@ class CategoryComposite extends CategoryComponent {
     }
 }
 
-// Example usage
-const mainCategory = new CategoryComposite("C001", "Laptops", "All laptop categories");
-const gamingCategory = new CategoryLeaf("C002", "Gaming Laptops", "High-performance laptops for gaming");
-const ultrabookCategory = new CategoryLeaf("C003", "Ultrabooks", "Lightweight, high-performance laptops");
 
-// Adding subcategories to main category
-mainCategory.addCategory(gamingCategory);
-mainCategory.addCategory(ultrabookCategory);
+const categoryMethods = {
+    getAllRootCategories: () => {
+        return db('categories').where("parentID", null);
+    },
 
-// Logging category structure
-console.log("Main Category:", mainCategory.getName());
-console.log("Subcategories:", mainCategory.getSubCategories().map((cat) => cat.getName()));
+    getCategoryTree: async () => {
+        try {
+            const categories = await db('categories').select('catID', 'catName', 'parentID');
 
-module.exports = { CategoryComponent, CategoryLeaf, CategoryComposite };
+            if (categories.length === 0) {
+                throw new Error('No categories found.');
+            }
 
-const db = require('../config/db');
+            const categoryMap = new Map();
+            categories.forEach(category => {
+                categoryMap.set(category.catID, { ...category, children: [] });
+            });
 
-// Lấy tất cả danh mục
-exports.getCategories = () => {
-    return db('categories');
+            const tree = [];
+
+            categories.forEach(category => {
+                if (category.parentID === null || category.parentID === undefined) {
+                    tree.push(categoryMap.get(category.catID));
+                } else {
+                    const parentCategory = categoryMap.get(category.parentID);
+                    if (parentCategory) {
+                        parentCategory.children.push(categoryMap.get(category.catID));
+                    }
+                }
+            });
+
+            if (tree.length === 0) {
+                throw new Error('No root categories found.');
+            }
+            return tree;
+        } catch (error) {
+            throw new Error(`Failed to fetch categories: ${error.message}`);
+        }
+    },
+
+
+    getAllChildrenCategoriesByCatID: (id) => {
+        return db('categories').where('parentID', id);
+    },
+
+    getCategoryByCatId: async (id) => {
+        try {
+            const categoryDetail = await db('categories').where('CatId', id).first();
+
+            if (categoryDetail === null) {
+                throw new Error(`No categories found`);
+            }
+            return categoryDetail;
+        } catch (error) {
+            throw new Error(`Failed to fetch categories: ${error.message}`);
+        }
+    },
+
+    getCategoryByName: (categoryName) => {
+        return db('categories').where('CatName', categoryName).select('CatId').first();
+    },
+
+    addCategory: (category) => {
+        return db('categories').insert(category);
+    },
+
+    deleteCategory: (id) => {
+        return db('categories').where('CatId', id).del();
+    },
+
+    deleteCategoryByParentId: (id) => {
+        return db('categories').where('ParentId', id).del();
+    },
+
+    updateCategory: (id, category) => {
+        return db('categories').where('CatId', id).update({
+            CatName: category?.CatName,
+        });
+    },
+
+    getChildCategoriesByParentId: (parentId) => {
+        return db('categories').where('ParentId', parentId);
+    },
+
+    isParentCategory: async (id) => {
+        const [{ count }] = await db('categories')
+            .where('ParentId', id)
+            .count({ count: '*' });
+        return count > 0;
+    },
 };
 
-// Lấy danh mục theo ID
-exports.getCategoryById = (id) => {
-    return db('categories').where('CatId', id).first();
-};
-
-// Lấy danh mục theo tên
-exports.getCategoryByName = (categoryName) => {
-    return db('categories').where('CatName', categoryName).select('CatId').first();
-};
-
-// Thêm danh mục mới
-exports.addCategory = (category) => {
-    return db('categories').insert(category);
-};
-
-// Thêm hình ảnh chính cho sản phẩm qua raw query
-exports.addRawCategory = (id, image) => {
-    return db.raw(`UPDATE products SET ImageMain = '${image}' WHERE ProId = '${id}'`);
-};
-
-// Xóa danh mục theo ID
-exports.deleteCategory = (id) => {
-    return db('categories').where('CatId', id).del();
-};
-
-// Xóa danh mục theo Parent ID
-exports.deleteCategoryByParentId = (id) => {
-    return db('categories').where('ParentId', id).del();
-};
-
-// Cập nhật danh mục
-exports.updateCategory = (id, category) => {
-    return db('categories').where('CatId', id).update({
-        CatName: category?.CatName,
-    });
-};
-
-// Lấy danh mục cha
-exports.getParentCategories = () => {
-    return db('parentcategories');
-};
-
-// Thêm danh mục cha mới
-exports.addParentCategory = (parentCategory) => {
-    return db('parentcategories').insert(parentCategory);
-};
-
-// Xóa danh mục cha theo ID
-exports.deleteParentCategory = async (id) => {
-    const result = await db('parentcategories').where('ParentId', id).del();
-    return result;
-};
-
-// Cập nhật danh mục cha
-exports.updateParentCategory = (id, parentCategory) => {
-    return db('parentcategories').where('ParentId', id).update(parentCategory);
-};
-
-// Lấy danh mục con theo Parent ID
-exports.getChildCategoriesByParentId = (parentId) => {
-    return db('categories').where('ParentId', parentId);
-};
-
-// Kiểm tra danh mục có phải là cha
-exports.isParentCategory = async (id) => {
-    const [{ count }] = await db('categories')
-        .where('ParentId', id)
-        .count({ count: '*' });
-    return count > 0;
-};
+module.exports = { categoryMethods };

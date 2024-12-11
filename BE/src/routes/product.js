@@ -1,13 +1,24 @@
 // src/routes/product.js
 const express = require('express');
-const { getProducts, getProduct } = require('../controllers/product');
+
+const {
+    getAllProducts,
+    getProductByID,
+    getDetailProductByProdID,
+    getRelatedProductsByProID
+} = require('../controllers/product');
 
 const router = express.Router();
 
-// Endpoint: Lấy tất cả sản phẩm
-router.get('/', getProducts);
-
-// Endpoint: Lấy sản phẩm theo ID
-router.get('/:id', getProduct);
+router.get('/general/all', getAllProducts);
+router.get('/general/:id', getProductByID);
+router.get('/detail/:id', getDetailProductByProdID);
+router.get('/related/:id', getRelatedProductsByProID);
+//search with key, filtering ...
+router.get('/search/', );
+//admin manipulation
+router.post('/add/', );
+router.post('/update/', );
+router.post('/remove/', );
 
 module.exports = router;

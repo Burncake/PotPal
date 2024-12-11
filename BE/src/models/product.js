@@ -1,4 +1,5 @@
-// src/models/product.js
+const {db} = require('../config/db');
+
 class Product {
     constructor(productID, name, description, price, stock, category, imageUrl, available, discount) {
         this.productID = productID;
@@ -98,132 +99,155 @@ class Product {
     }
 }
 
-// Sample laptops (dummy data)
-const laptops = [
-    new Product(
-        "L001",
-        "Gaming Laptop",
-        "High-performance laptop designed for gaming",
-        1500,
-        20,
-        ["Gaming", "Performance"],
-        "gaming-laptop.jpg",
-        true,
-        15
-    ),
-    new Product(
-        "L002",
-        "Ultrabook Laptop",
-        "Lightweight laptop for professionals",
-        1200,
-        15,
-        ["Ultrabook", "Lightweight"],
-        "ultrabook-laptop.jpg",
-        true,
-        10
-    ),
-    new Product(
-        "L003",
-        "Budget Laptop",
-        "Affordable laptop for everyday use",
-        500,
-        50,
-        ["Budget", "Everyday Use"],
-        "budget-laptop.jpg",
-        true,
-        5
-    ),
-];
+// Tạo object chứa các hàm thao tác với sản phẩm
+const productMethods = {
+    getAllProducts: async () => {
+        try {
+            const res = await db('products');
+            if (res === null || res === undefined) {
+                throw new Error('No products found in database.');
+            }
+            return res;
+        } catch (error) {
+            throw new Error(`Failed to fetch product details: ${error.message}`);
+        }
+    },
 
-// Get all laptops
-function getAllLaptops() {
-    return laptops;
-}
+    getProductByID: async (prodID) => {
+        const res = await db('products')
+            .where('prodID', prodID);
+    },
 
-// Get a laptop by ID
-function getLaptopById(productID) {
-    return laptops.find((laptop) => laptop.productID === productID);
-}
+    addProduct: (product) => {
+        return db('products').insert(product);
+    },
 
-module.exports = { Product, getAllLaptops, getLaptopById };
+    updateProduct: (id, product) => {
+        return db('products').where('prodID', id).update(product);
+    },
+
+    deleteProductByID: async (id) => {
+        const result = await db('products').where('prodID', id).del();
+        return result;
+    },
+
+    getProductsByCatId: async (catID, page, limit) => {
+        const data = await db('products')
+            .where('catID', catID)
+            .limit(limit)
+            .offset((page - 1) * limit);
+
+        const [{ total }] = await db('products')
+            .where('catID', catID)
+            .count({ total: '*' });
+
+        const totalPages = Math.ceil(total / limit);
+        return { data, total, totalPages };
+    },
+
+    searchProducts: async (keyword) => {
+        return db('products').where('prodName', 'like', `%${keyword}%`);
+    },
+
+    //done
+    getDetailProductByProdID: async (prodIDs) => {
+        try {
+            // Nếu prodIDs là một chuỗi, chuyển thành mảng
+            if (!Array.isArray(prodIDs)) {
+                prodIDs = [prodIDs];
+            }
+
+            // Truy vấn thông tin sản phẩm từ bảng products
+            const products = await db('products')
+                .select('prodID', 'prodName', 'price', 'description', 'stock')
+                .whereIn('prodID', prodIDs);
+
+            if (products.length === 0) {
+                throw new Error('No products found with the given IDs.');
+            }
+
+            // Truy vấn danh mục liên quan từ bảng productsCategories và categories
+            const categories = await db('productsCategories as pc')
+                .join('categories as c', 'pc.catID', 'c.catID')
+                .select('pc.prodID', 'c.catName')
+                .whereIn('pc.prodID', prodIDs);
+
+            // Tạo một map để nhóm danh mục theo prodID
+            const categoryMap = {};
+            categories.forEach((cat) => {
+                if (!categoryMap[cat.prodID]) {
+                    categoryMap[cat.prodID] = [];
+                }
+                categoryMap[cat.prodID].push(cat.catName);
+            });
+
+            // Gắn danh mục vào từng sản phẩm
+            products.forEach((product) => {
+                product.catNames = categoryMap[product.prodID] || []; // Nếu không có danh mục, gắn mảng rỗng
+            });
+
+            return products;
+        } catch (error) {
+            throw new Error(`Failed to fetch product details: ${error.message}`);
+        }
+    },
 
 
-const db = require('../config/db');
+    //undone
+    relatedProductsByCatID: (catID, limit) => {
+        return db('products')
+            .where('catID', catID)
+            .orderByRaw('RAND()')
+            .limit(limit);
+    },
 
-// Lấy tất cả sản phẩm
-exports.getProducts = () => {
-    return db('products');
+    //undone
+    relatedProductsByProID: async (prodID, limit) => {
+        try {
+            // Lấy danh sách catID từ bảng productsCategories theo prodID
+            const catIDs = await db('productsCategories')
+                .select('catID')
+                .where('prodID', prodID);
+
+            if (!catIDs || catIDs.length === 0) {
+                throw new Error(`Product with ID ${prodID} does not exist or has no categories.`);
+            }
+
+            // Lấy danh sách prodID khác từ bảng productsCategories thuộc các catID đã lấy
+            const relatedProductIDs = await db('productsCategories')
+                .select('prodID')
+                .whereIn('catID', catIDs.map(row => row.catID))
+                .andWhere('prodID', '!=', prodID);
+
+            if (!relatedProductIDs || relatedProductIDs.length === 0) {
+                return []; // Không có sản phẩm liên quan
+            }
+
+            // Lấy thông tin chi tiết sản phẩm từ bảng products
+            const relatedProducts = await db('products')
+                .whereIn('prodID', relatedProductIDs.map(row => row.prodID))
+                .orderByRaw('RAND()') // Lấy ngẫu nhiên
+                .limit(limit);
+
+            return relatedProducts;
+        } catch (error) {
+            throw new Error(`Failed to fetch related products: ${error.message}`);
+        }
+    },
+
+
+
+    updateMainImageByID: (id, mainImage) => {
+        return db('products').where('prodID', id).update({ mainImage });
+    },
+
+    updateImageArrayByID: (id, imageArray) => {
+        return db('products').where('prodID', id).update({ imageArray });
+    },
+
+    changeProductStatusByID: (id, status) => {
+        return db('products').where('prodID', id).update({ prodStatus: status });
+    },
 };
 
-// Lấy thông tin sản phẩm theo ID
-exports.getProductById = (prodId) => {
-    return db('products').where('prodID', prodId).first();
-};
-
-// Thêm sản phẩm mới
-exports.addProduct = (product) => {
-    return db('products').insert(product);
-};
-
-// Cập nhật sản phẩm theo ID
-exports.updateProduct = (id, product) => {
-    return db('products').where('prodID', id).update(product);
-};
-
-// Xóa sản phẩm theo ID
-exports.deleteProduct = async (id) => {
-    const result = await db('products').where('prodID', id).del();
-    return result;
-};
-
-// Lấy sản phẩm theo danh mục
-exports.getProductsByCatId = async (catId, page, limit) => {
-    const data = await db('products')
-        .where('catID', catId)
-        .limit(limit)
-        .offset((page - 1) * limit);
-
-    const [{ total }] = await db('products')
-        .where('catID', catId)
-        .count({ total: '*' });
-
-    const totalPages = Math.ceil(total / limit);
-    return { data, total, totalPages };
-};
-
-// Tìm kiếm sản phẩm theo tên
-exports.searchProducts = async (keyword) => {
-    return db('products').where('prodName', 'like', `%${keyword}%`);
-};
-
-// Lấy chi tiết sản phẩm theo ID (không kèm danh mục)
-exports.getDetailProductById = (id) => {
-    return db('products')
-        .where('products.prodID', id)
-        .first();
-};
-
-// Lấy sản phẩm liên quan theo danh mục
-exports.relatedProductsByCatId = (catId) => {
-    return db('products')
-        .where('catID', catId)
-        .orderByRaw('RAND()')
-        .limit(9);
-};
-
-// Cập nhật hình ảnh chính của sản phẩm
-exports.updateMainImage = (id, mainImage) => {
-    return db('products').where('prodID', id).update({ mainImage });
-};
-
-// Cập nhật mảng hình ảnh của sản phẩm
-exports.updateImageArray = (id, imageArray) => {
-    return db('products').where('prodID', id).update({ imageArray });
-};
-
-// Thay đổi trạng thái sản phẩm
-exports.changeProductStatus = (id, status) => {
-    return db('products').where('prodID', id).update({ prodStatus: status });
-};
-
-
+module.exports = { Product, productMethods };
