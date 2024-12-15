@@ -7,6 +7,8 @@ import ProductCategory from '../views/ProductCategory.vue'
 import SearchRes from '../views/SearchRes.vue'
 import LoginView from '../views/LoginView.vue'
 import SignupView from '../views/RegisterView.vue'
+
+import CartCard from '../components/CartCard.vue'
 const routes = [
   {
     path: '/',
@@ -47,6 +49,11 @@ const routes = [
     path: '/search',
     name: 'SearchRes',
     component: SearchRes,
+  },
+  {
+    path: '/cart',
+    name: 'cart',
+    component: CartCard,
   },
 ]
 

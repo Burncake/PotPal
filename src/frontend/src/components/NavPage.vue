@@ -64,6 +64,7 @@
           </div>
           <router-link class="nav-link" to="/about">About Us</router-link>
           <router-link class="nav-link" to="/contact">Contact Us</router-link>
+          <router-link class="nav-link" to="/cart">Cart</router-link>
           <router-link class="nav-link" to="/login">Login</router-link>
           <router-link class="nav-link" to="/register">Register</router-link>
         </div>
