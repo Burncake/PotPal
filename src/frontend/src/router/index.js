@@ -7,7 +7,9 @@ import ProductCategory from '../views/ProductCategory.vue'
 import SearchRes from '../views/SearchRes.vue'
 import LoginView from '../views/LoginView.vue'
 import SignupView from '../views/RegisterView.vue'
-import AdminView from '@/views/AdminProductsView.vue'
+import AdminView from '../views/AdminProductsView.vue'
+
+import CartView from '../views/CartView.vue'
 const routes = [
   {
     path: '/',
@@ -45,15 +47,19 @@ const routes = [
     component: SignupView,
   },
   {
+    path: '/search',
+    name: 'SearchRes',
+    component: SearchRes,
+  },
+  {
     path: '/admin/products',
     name: 'admin',
     component: AdminView,
   },
-  
   {
-    path: '/search',
-    name: 'SearchRes',
-    component: SearchRes,
+    path: '/cart',
+    name: 'cart',
+    component: CartView,
   },
 ]
 

@@ -13,7 +13,7 @@
             <p><strong>Description:</strong> {{ product.description }}</p>
             <div class="mt-4">
               <button class="btn btn-primary me-2">Buy Now</button>
-              <button class="btn btn-outline-primary">Add to Cart</button>
+              <AddToCart :product="product" />
             </div>
           </div>
         </div>
@@ -46,12 +46,17 @@
 </template>
 
 <script>
+import AddToCart from '@/components/Cart/AddToCart.vue'
+
 export default {
   data() {
     return {
       product: null,
       relatedProducts: [],
     }
+  },
+  components: {
+    AddToCart,
   },
   watch: {
     '$route.params.id': 'fetchData',
