@@ -18,8 +18,8 @@ export default defineConfig({
   root: '.',
   build: {
     outDir: 'dist',
-  },
-  rollupOptions: {
-      input: 'index.html', // Entry point for Vite
+    rollupOptions: {
+      input: 'index.html',
+    },
   },
 })
