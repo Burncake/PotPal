@@ -18,6 +18,7 @@ export default defineConfig({
   root: '.',
   build: {
     outDir: 'dist',
+    base: '/',
     rollupOptions: {
       input: 'index.html',
     },
