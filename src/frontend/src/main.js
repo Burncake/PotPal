@@ -10,6 +10,7 @@ import router from './router'
 // import 'mdb-ui-kit/css/mdb.min.css'
 const app = createApp(App)
 const pinia = createPinia()
+const port = 5173
 
 app.use(pinia)
 app.use(router)
