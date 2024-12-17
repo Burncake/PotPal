@@ -191,10 +191,8 @@
   <style scoped>
   .admin-layout {
     display: flex;
-    min-height: 100vh;
-    position: relative;
+    min-height: calc(100vh - 60px); /* Adjust based on your navbar height */
     background-color: #f8f9fa;
-    width: 100%;
   }
   
   .admin-sidebar {
