@@ -1,71 +1,73 @@
 <template>
-  <div class="admin-layout">
-    <!-- Admin Sidebar -->
-    <aside class="admin-sidebar">
-      <div class="admin-nav-container">
-        <router-link
-          v-for="item in navigationItems"
-          :key="item.name"
-          :to="item.href"
-          class="admin-nav-item"
-          :class="{ 'admin-nav-item-active': currentSection === item.name }"
-          @click.prevent="currentSection = item.name"
-        >
-          <component :is="item.icon" class="admin-nav-icon" />
-          <span>{{ item.name }}</span>
-        </router-link>
-      </div>
-    </aside>
-
-    <!-- Main Content -->
-    <div class="admin-content">
-      <main class="admin-main">
-        <div class="admin-header">
-          <h2 class="admin-page-title">Categories</h2>
-          <button 
-            @click="openModal('add')"
-            class="admin-button"
+  <div class="admin-layout-container">
+    <div class="admin-layout">
+      <!-- Admin Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-nav-container">
+          <router-link
+            v-for="item in navigationItems"
+            :key="item.name"
+            :to="item.href"
+            class="admin-nav-item"
+            :class="{ 'admin-nav-item-active': currentSection === item.name }"
+            @click.prevent="currentSection = item.name"
           >
-            <PlusIcon class="admin-button-icon" />
-            Add Category
-          </button>
+            <component :is="item.icon" class="admin-nav-icon" />
+            <span>{{ item.name }}</span>
+          </router-link>
         </div>
+      </aside>
 
-        <div class="admin-table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th class="admin-th w-[30%]">Category</th>
-                <th class="admin-th w-[40%]">Description</th>
-                <th class="admin-th w-[20%]">Parent Category</th>
-                <th class="admin-th w-[10%] text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="category in categories" :key="category.catID" class="admin-tr">
-                <td class="admin-td">
-                  <div class="admin-category-cell">
-                    <div>
-                      <div class="admin-category-name">{{ category.catName }}</div>
-                      <div class="admin-category-id">ID: {{ category.catID }}</div>
+      <!-- Main Content -->
+      <div class="admin-content">
+        <main class="admin-main">
+          <div class="admin-header">
+            <h2 class="admin-page-title">Categories</h2>
+            <button 
+              @click="openModal('add')"
+              class="admin-button"
+            >
+              <PlusIcon class="admin-button-icon" />
+              Add Category
+            </button>
+          </div>
+
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th class="admin-th w-[30%]">Category</th>
+                  <th class="admin-th w-[40%]">Description</th>
+                  <th class="admin-th w-[20%]">Parent Category</th>
+                  <th class="admin-th w-[10%] text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="category in categories" :key="category.catID" class="admin-tr">
+                  <td class="admin-td">
+                    <div class="admin-category-cell">
+                      <div>
+                        <div class="admin-category-name">{{ category.catName }}</div>
+                        <div class="admin-category-id">ID: {{ category.catID }}</div>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td class="admin-td">{{ category.description }}</td>
-                <td class="admin-td">{{ getParentCategoryName(category.parentID) }}</td>
-                <td class="admin-td text-right">
-                  <button @click="openModal('edit', category)" class="admin-action-button text-blue-600">
-                    <EditIcon class="admin-action-icon" />
-                  </button>
-                  <button @click="deleteCategory(category.catID)" class="admin-action-button text-red-600">
-                    <TrashIcon class="admin-action-icon" />
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </main>
+                  </td>
+                  <td class="admin-td">{{ category.description }}</td>
+                  <td class="admin-td">{{ getParentCategoryName(category.parentID) }}</td>
+                  <td class="admin-td text-right">
+                    <button @click="openModal('edit', category)" class="admin-action-button text-blue-600">
+                      <EditIcon class="admin-action-icon" />
+                    </button>
+                    <button @click="deleteCategory(category.catID)" class="admin-action-button text-red-600">
+                      <TrashIcon class="admin-action-icon" />
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
     </div>
 
     <!-- Modal -->
@@ -204,9 +206,15 @@ const deleteCategory = async (catID) => {
 </script>
 
 <style scoped>
+.admin-layout-container {
+  position: relative;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
 .admin-layout {
   display: flex;
-  height: calc(100vh - 60px); /* Adjust based on your navbar height */
+  height: 100%;
   background-color: #f8f9fa;
 }
 
@@ -216,7 +224,9 @@ const deleteCategory = async (catID) => {
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
+  height: 100%;
   flex-shrink: 0;
+  overflow-y: auto;
 }
 
 .admin-nav-container {
@@ -251,11 +261,17 @@ const deleteCategory = async (catID) => {
 
 .admin-content {
   flex: 1;
-  overflow: auto;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-main {
   padding: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .admin-header {
@@ -465,4 +481,3 @@ const deleteCategory = async (catID) => {
   background-color: #1d4ed8;
 }
 </style>
-
