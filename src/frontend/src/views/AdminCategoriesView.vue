@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-layout-container">
+  <div class="admin-layout">
     <!-- Admin Sidebar -->
     <aside class="admin-sidebar">
       <div class="admin-nav-container">
@@ -202,10 +202,12 @@ const deleteCategory = async (catID) => {
 </script>
 
 <style scoped>
-.admin-layout-container {
+.admin-layout {
   display: flex;
   height: 100vh;
+  width: 100%;
   overflow: hidden;
+  background-color: #f8f9fa;
 }
 
 .admin-sidebar {
@@ -214,12 +216,15 @@ const deleteCategory = async (catID) => {
   border-right: 1px solid #e5e7eb;
   height: 100%;
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .admin-content {
-  flex: 1;
+  flex-grow: 1;
   overflow-y: auto;
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-nav-container {
@@ -290,6 +295,7 @@ const deleteCategory = async (catID) => {
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   overflow-x: auto;
+  flex-grow: 1;
 }
 
 .admin-table {
@@ -320,6 +326,9 @@ const deleteCategory = async (catID) => {
   padding: 1rem;
   font-size: 0.875rem;
   color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .admin-category-cell {
@@ -352,6 +361,106 @@ const deleteCategory = async (catID) => {
   height: 1.25rem;
 }
 
-/* Modal styles remain unchanged */
-</style>
+.admin-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
 
+.admin-modal {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 32rem;
+  margin: 0 1rem;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.admin-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.admin-input {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.admin-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.admin-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.admin-button-secondary {
+  padding: 0.5rem 1rem;
+  background-color: #f3f4f6;
+  color: #374151;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.admin-button-secondary:hover {
+  background-color: #e5e7eb;
+}
+
+.admin-button-primary {
+  padding: 0.5rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.admin-button-primary:hover {
+  background-color: #1d4ed8;
+}
+</style>
