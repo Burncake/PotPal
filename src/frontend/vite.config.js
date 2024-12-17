@@ -15,4 +15,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  template: {
+    compilerOptions: {
+      isCustomElement: (tag) => tag === 'footerpage' && process.env.NODE_ENV === 'development',
+    },
+  },
 })
