@@ -1,7 +1,6 @@
 <template>
   <NavPage/>
   <router-view></router-view>
-  <FooterPage/>
 </template>
 
 <script>
