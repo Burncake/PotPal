@@ -19,51 +19,53 @@
 
     <!-- Main Content -->
     <div class="admin-content">
-      <div class="admin-header">
-        <h2 class="admin-page-title">Categories</h2>
-        <button 
-          @click="openModal('add')"
-          class="admin-button"
-        >
-          <PlusIcon class="admin-button-icon" />
-          Add Category
-        </button>
-      </div>
+      <main class="admin-main">
+        <div class="admin-header">
+          <h2 class="admin-page-title">Categories</h2>
+          <button 
+            @click="openModal('add')"
+            class="admin-button"
+          >
+            <PlusIcon class="admin-button-icon" />
+            Add Category
+          </button>
+        </div>
 
-      <div class="admin-table-container">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th class="admin-th w-[30%]">Category</th>
-              <th class="admin-th w-[40%]">Description</th>
-              <th class="admin-th w-[20%]">Parent Category</th>
-              <th class="admin-th w-[10%] text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="category in categories" :key="category.catID" class="admin-tr">
-              <td class="admin-td">
-                <div class="admin-category-cell">
-                  <div>
-                    <div class="admin-category-name">{{ category.catName }}</div>
-                    <div class="admin-category-id">ID: {{ category.catID }}</div>
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th class="admin-th w-[30%]">Category</th>
+                <th class="admin-th w-[40%]">Description</th>
+                <th class="admin-th w-[20%]">Parent Category</th>
+                <th class="admin-th w-[10%] text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="category in categories" :key="category.catID" class="admin-tr">
+                <td class="admin-td">
+                  <div class="admin-category-cell">
+                    <div>
+                      <div class="admin-category-name">{{ category.catName }}</div>
+                      <div class="admin-category-id">ID: {{ category.catID }}</div>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td class="admin-td">{{ category.description }}</td>
-              <td class="admin-td">{{ getParentCategoryName(category.parentID) }}</td>
-              <td class="admin-td text-right">
-                <button @click="openModal('edit', category)" class="admin-action-button text-blue-600">
-                  <EditIcon class="admin-action-icon" />
-                </button>
-                <button @click="deleteCategory(category.catID)" class="admin-action-button text-red-600">
-                  <TrashIcon class="admin-action-icon" />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                </td>
+                <td class="admin-td">{{ category.description }}</td>
+                <td class="admin-td">{{ getParentCategoryName(category.parentID) }}</td>
+                <td class="admin-td text-right">
+                  <button @click="openModal('edit', category)" class="admin-action-button text-blue-600">
+                    <EditIcon class="admin-action-icon" />
+                  </button>
+                  <button @click="deleteCategory(category.catID)" class="admin-action-button text-red-600">
+                    <TrashIcon class="admin-action-icon" />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
     </div>
 
     <!-- Modal -->
@@ -203,39 +205,24 @@ const deleteCategory = async (catID) => {
 
 <style scoped>
 .admin-layout {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   display: flex;
-  overflow: hidden;
+  min-height: calc(100vh - 60px); /* Adjust based on your navbar height */
+  background-color: #f8f9fa;
 }
 
 .admin-sidebar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
   width: 250px;
   background: white;
   border-right: 1px solid #e5e7eb;
-  overflow-y: auto;
-}
-
-.admin-content {
-  position: absolute;
-  top: 0;
-  left: 250px;
-  right: 0;
-  bottom: 0;
-  overflow-y: auto;
-  padding: 1.5rem;
-  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 }
 
 .admin-nav-container {
   padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-nav-item {
@@ -260,6 +247,15 @@ const deleteCategory = async (catID) => {
   width: 1.25rem;
   height: 1.25rem;
   margin-right: 0.75rem;
+}
+
+.admin-content {
+  flex: 1;
+  overflow: auto;
+}
+
+.admin-main {
+  padding: 1.5rem;
 }
 
 .admin-header {
@@ -301,8 +297,6 @@ const deleteCategory = async (catID) => {
   background: white;
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  overflow-x: auto;
-  flex-grow: 1;
 }
 
 .admin-table {
