@@ -19,7 +19,7 @@
   
       <!-- Main Content -->
       <div class="admin-content">
-        <main class="admin-main">
+        <main class="admin-main-wrapper">
           <div class="admin-header">
             <h2 class="admin-page-title">Categories</h2>
             <button 
@@ -191,8 +191,10 @@
   <style scoped>
   .admin-layout {
     display: flex;
-    min-height: calc(100vh - 60px); /* Adjust based on your navbar height */
+    min-height: 100vh;
+    position: relative;
     background-color: #f8f9fa;
+    width: 100%;
   }
   
   .admin-sidebar {
@@ -248,6 +250,14 @@
   .admin-content {
     flex: 1;
     overflow: auto;
+    position: relative;
+    min-width: 0;
+  }
+  
+  .admin-main-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
   
   .admin-main {
