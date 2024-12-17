@@ -203,28 +203,35 @@ const deleteCategory = async (catID) => {
 
 <style scoped>
 .admin-layout {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
-  height: 100vh;
-  width: 100%;
   overflow: hidden;
-  background-color: #f8f9fa;
 }
 
 .admin-sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
   width: 250px;
   background: white;
   border-right: 1px solid #e5e7eb;
-  height: 100%;
   overflow-y: auto;
-  flex-shrink: 0;
 }
 
 .admin-content {
-  flex-grow: 1;
+  position: absolute;
+  top: 0;
+  left: 250px;
+  right: 0;
+  bottom: 0;
   overflow-y: auto;
   padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
+  background-color: #f8f9fa;
 }
 
 .admin-nav-container {
@@ -464,3 +471,4 @@ const deleteCategory = async (catID) => {
   background-color: #1d4ed8;
 }
 </style>
+
