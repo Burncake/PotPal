@@ -10,12 +10,12 @@ const {
 const router = express.Router();
 
 // Route: Thêm sản phẩm vào giỏ hàng
-router.post('/cart/add-to-cart', addToCart);
+router.put('/cart/add-to-cart', addToCart);
 // Route: Xóa sản phẩm khỏi giỏ hàng
-router.post('/cart/remove-from-cart', removeFromCart);
+router.put('/cart/remove-from-cart', removeFromCart);
 // Route: Cập nhật số lượng sản phẩm trong giỏ hàng
-router.post('/cart/update-cart-quantity', updateCartQuantity);
+router.put('/cart/update-cart-quantity', updateCartQuantity);
 // Route: Kiểm tra tính hợp lệ của giỏ hàng (kiểm tra số lượng trong kho)
-router.post('/cart/validate-cart', validateCart);
+router.get('/cart/validate-cart', validateCart);
 
 module.exports = router;

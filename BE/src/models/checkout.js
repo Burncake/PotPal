@@ -1,8 +1,7 @@
-// models/CartModel.js
 const db = require('../config/db'); // Giả sử bạn đang dùng knex hoặc sequelize
 
-class cartMethods {
-    static async getCartByUserID(userID) {
+const cartMethods = {
+    getCartByUserID: async (userID) => {
         try {
             return await db('carts')
                 .where('cusID', userID)
@@ -10,18 +9,18 @@ class cartMethods {
         } catch (error) {
             throw new Error(`Failed to fetch cart: ${error.message}`);
         }
-    }
+    },
 
-    static async getCartDetails(cartID) {
+    getCartDetails: async (cartID) => {
         try {
             return await db('cartsDetails')
                 .where('cartID', cartID);
         } catch (error) {
             throw new Error(`Failed to fetch cart details: ${error.message}`);
         }
-    }
+    },
 
-    static async addProductToCart(cartID, prodID, quantity) {
+    addProductToCart: async (cartID, prodID, quantity) => {
         try {
             // Kiểm tra sản phẩm có tồn tại và còn đủ số lượng
             const product = await db('products').where('prodID', prodID).first();
@@ -55,9 +54,9 @@ class cartMethods {
         } catch (error) {
             throw new Error(`Failed to add product to cart: ${error.message}`);
         }
-    }
+    },
 
-    static async removeProductFromCart(cartID, prodID) {
+    removeProductFromCart: async (cartID, prodID) => {
         try {
             const result = await db('cartsDetails')
                 .where({ cartID, prodID })
@@ -66,9 +65,9 @@ class cartMethods {
         } catch (error) {
             throw new Error(`Failed to remove product from cart: ${error.message}`);
         }
-    }
+    },
 
-    static async updateProductQuantityInCart(cartID, prodID, quantity) {
+    updateProductQuantityInCart: async (cartID, prodID, quantity) => {
         try {
             // Kiểm tra số lượng sản phẩm trong kho
             const product = await db('products').where('prodID', prodID).first();
@@ -90,9 +89,9 @@ class cartMethods {
         } catch (error) {
             throw new Error(`Failed to update product quantity: ${error.message}`);
         }
-    }
+    },
 
-    static async checkCartAvailability(cartID) {
+    checkCartAvailability: async (cartID) => {
         try {
             const cartDetails = await db('cartsDetails')
                 .where('cartID', cartID);
@@ -108,7 +107,7 @@ class cartMethods {
         } catch (error) {
             throw new Error(`Cart validation failed: ${error.message}`);
         }
-    }
+    },
 }
 
 module.exports = cartMethods;

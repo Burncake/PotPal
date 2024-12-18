@@ -9,9 +9,10 @@ const { db, checkDbConnection } = require('./src/config/db');
 require('dotenv').config();
 
 const productRoutes = require('./src/routes/product');
-// const accountRoutes = require('./src/routes/account');
+const accountRoutes = require('./src/routes/account');
 const categoryRoutes = require('./src/routes/category');
 const checkoutRoutes = require('./src/routes/checkout');
+const discountRoutes = require('./src/routes/discount');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,9 +24,11 @@ app.get('/', (req, res) => {
 });
 
 app.use('/product', productRoutes);
-// app.use('/account', accountRoutes);
+app.use('/account', accountRoutes);
 app.use('/category', categoryRoutes);
 app.use('/checkout', checkoutRoutes);
+app.use('/discount', discountRoutes);
+
 
 // Kiểm tra kết nối cơ sở dữ liệu và sau đó khởi động server
 const startServer = async () => {

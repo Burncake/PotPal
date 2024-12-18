@@ -29,9 +29,6 @@ const getDetailProductByProdID = async (req, res) => {
     }
 };
 
-
-
-
 const getRelatedProductsByProID = async (req, res) => {
     const prodID = req.params.id; // Lấy prodID từ URL params
     const limit = req.query.limit || 5; // Lấy limit từ query hoặc mặc định là 5

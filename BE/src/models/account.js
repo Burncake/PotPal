@@ -1,55 +1,99 @@
-const db = require('../utils/db');
-const bcrypt = require("bcrypt");
+const {db} = require('../config/db'); // Kết nối database
+const bcrypt = require('bcrypt');
 
-exports.findUserByUserName = (username) => {
-    return db('users').where('UserName', username).first();
-}
 
-exports.findUserById = (userId) => {
-    return db('users').where('UserId',userId).first()
-}
+const accountMethods = {
+    // 1. Thêm tài khoản mới
+    addAccount: async (username, password, email) => {
+        try {
+            const saltRounds = 10; // Số vòng lặp để tạo salt
+            const hashedPassword = await bcrypt.hash(password, saltRounds); // Hash mật khẩu
 
-exports.createUser = async (data) => {
-    try{
-        let {username, password} = data;
-        const isNewUser = await this.inThisEmailInUse(username);
-        if (!isNewUser) throw new Error('User already registered');
-        password=await bcrypt.hash(password, 8);
-        return await db('users').insert({username, password});
-    }catch (e) {
-        console.log(e)
-        return null
-    }
-}
+            // Lưu vào database
+            const [newAccount] = await db('users').insert({
+                username,
+                password: hashedPassword,
+                email,
+            }).returning('*');
 
-exports.comparePassword = async (password,passwordCheck) => {
-    if (!password) throw new Error('Password is required');
-    try {
-        console.log(password, passwordCheck)
-        return await bcrypt.compare(password, passwordCheck);
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
-}
+            return newAccount;
+        } catch (error) {
+            throw new Error(`Failed to create account: ${error.message}`);
+        }
+    },
 
-exports.inThisEmailInUse= async function (username) {
-    if(!username) throw new Error('Username is required');
-    try{
-        const user = await this.findUserByUserName(username);
-        return !user
-    }catch (e) {
-        console.log(e);
-        return false;
-    }
-}
+    // 2. Lấy thông tin tài khoản theo ID
+    getAccountByID: async (accountID) => {
+        try {
+            const account = await db('users').where({ accountID }).first();
+            if (!account) throw new Error('Account not found');
+            return account;
+        } catch (error) {
+            throw new Error(`Failed to fetch account: ${error.message}`);
+        }
+    },
 
-exports.findByIdAndUpdate = (id, data) => {
-    return db('users').where('id', id).update(data);
-}
+    // 3. Lấy danh sách tất cả tài khoản
+    getAllAccounts: async () => {
+        try {
+            return await db('users').select('*');
+        } catch (error) {
+            throw new Error(`Failed to fetch users: ${error.message}`);
+        }
+    },
 
-exports.findByIdAndUpdateToken = (id, data) => {
-    return db('users').where('UserId', id).update({
-        tokens:data
-    });
-}
+    // 4. Cập nhật thông tin tài khoản
+    updateAccountByID: async (accountID, updateData) => {
+        try {
+            const updatedAccount = await db('users')
+                .where({ accountID })
+                .update(updateData)
+                .returning('*');
+            if (!updatedAccount.length) throw new Error('Account not found');
+            return updatedAccount[0];
+        } catch (error) {
+            throw new Error(`Failed to update account: ${error.message}`);
+        }
+    },
+
+    // 5. Xóa tài khoản theo ID
+    deleteAccountByID: async (accountID) => {
+        try {
+            const deleted = await db('users').where({ accountID }).del();
+            if (!deleted) throw new Error('Account not found or already deleted');
+            return `Account ${accountID} deleted successfully.`;
+        } catch (error) {
+            throw new Error(`Failed to delete account: ${error.message}`);
+        }
+    },
+
+    // 6. Kiểm tra đăng nhập (dựa vào username và password đã hash)
+    validatePassword: async (username, inputPassword) => {
+        try {
+            // Lấy mật khẩu hash từ database dựa trên username
+            const account = await db('users').where('username', username).first();
+            if (!account) throw new Error('Account not found');
+
+            // So sánh mật khẩu nhập vào với mật khẩu đã hash
+            const isMatch = await bcrypt.compare(inputPassword, account.password);
+            if (!isMatch) throw new Error('Invalid password');
+
+            return account; // Đăng nhập thành công
+        } catch (error) {
+            throw new Error(`Password validation failed: ${error.message}`);
+        }
+    },
+    // Kiểm tra email tồn tại chưa
+    getAccountByEmail: async (email) => {
+        return await db('users').where('email', email).first();
+    },
+
+    // Kiểm tra phone tồn tại chưa
+    getAccountByPhone: async (phone) => {
+        return await db('users').where('phoneNumber', phone).first();
+    },
+
+
+};
+
+module.exports = accountMethods;

@@ -1,38 +1,25 @@
-require('dotenv').config(); // Đảm bảo biến môi trường được tải
 const jwt = require('jsonwebtoken');
+require('dotenv').config()
 
-// Middleware để kiểm tra token
-const authenticateToken = (req, res, next) => {
-    // Lấy token từ header Authorization
-    const token = req.headers['authorization']?.split(' ')[1]; // Lấy token sau "Bearer "
+// Secret key để ký và xác thực token
+const JWT_SECRET = process.env.SECRET_KEY;
 
+// Middleware xác thực token
+function authenticateToken(req, res, next) {
+    // Lấy token từ header hoặc query hoặc body
+    const token = req.headers['authorization']?.split(' ')[1] || req.body.token || req.query.token;
     if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
+        return res.status(401).json({ message: 'Access token is missing or invalid.' });
     }
 
-    // Xác minh token với SECRET_KEY
-    jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
-        if (err) {
-            return res.status(403).json({ message: 'Invalid token.' });
-        }
+    try {
+        // Xác thực và giải mã token
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded; // Lưu thông tin người dùng vào req để các middleware khác dùng
+        next(); // Cho phép tiếp tục xử lý request
+    } catch (error) {
+        return res.status(403).json({ message: 'Invalid or expired token.' });
+    }
+}
 
-        // Gán thông tin user vào request để sử dụng ở các bước sau
-        req.user = user;
-        next();
-    });
-};
-
-// Middleware để kiểm tra quyền của user (nếu cần)
-const authorizeRole = (roles = []) => {
-    return (req, res, next) => {
-        if (!roles.length) return next();
-
-        if (!roles.includes(req.user.role)) {
-            return res.status(403).json({ message: 'Forbidden: You do not have the required role.' });
-        }
-
-        next();
-    };
-};
-
-module.exports = { authenticateToken, authorizeRole };
+module.exports = authenticateToken;

@@ -14,9 +14,8 @@ router.get('/general/all', getAllProducts);
 router.get('/general/:id', getProductByID);
 router.get('/detail/:id', getDetailProductByProdID);
 router.get('/related/:id', getRelatedProductsByProID);
-//search with key, filtering ...
+
 router.get('/search/', );
-//admin manipulation
 router.post('/add/', );
 router.post('/update/', );
 router.post('/remove/', );

@@ -1,13 +1,9 @@
-// src/routes/product.js
 const express = require('express');
-
-// const { getAllProducts, getProductByID } = require('../controllers/account');
-
 const router = express.Router();
+const accountController = require('../controllers/account');
 
-// Endpoint: Lấy tất cả sản phẩm
-// router.get('/all', getAllProducts);
-//
-// // Endpoint: Lấy sản phẩm theo ID
-// router.get('/:id', getProductByID);
+router.post('/register', accountController.register);
+router.post('/login', accountController.login);
+router.get('/:username', accountController.getAccount);
+
 module.exports = router;

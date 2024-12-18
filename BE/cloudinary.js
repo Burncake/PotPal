@@ -2,9 +2,9 @@ const cloudinary = require('cloudinary').v2;
 
 // Cấu hình với thông tin API của bạn
 cloudinary.config({
-    cloud_name: 'your-cloud-name', // Thay bằng Cloud Name
-    api_key: 'your-api-key',      // Thay bằng API Key
-    api_secret: 'your-api-secret' // Thay bằng API Secret
+    cloud_name: 'your-cloud-name',
+    api_key: 'your-api-key',
+    api_secret: 'your-api-secret'
 });
 
 module.exports = cloudinary;

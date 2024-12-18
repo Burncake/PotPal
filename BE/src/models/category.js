@@ -19,13 +19,11 @@ class CategoryComponent {
         return this.description;
     }
 }
-// CategoryLeaf: Represents individual (leaf) categories with no subcategories
 class CategoryLeaf extends CategoryComponent {
     constructor(categoryID, categoryName, description) {
         super(categoryID, categoryName, description);
     }
 }
-// CategoryComposite: Represents categories with subcategories
 class CategoryComposite extends CategoryComponent {
     constructor(categoryID, categoryName, description) {
         super(categoryID, categoryName, description);
