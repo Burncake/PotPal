@@ -22,7 +22,10 @@
       <main class="admin-main">
         <div class="admin-header">
           <h2 class="admin-page-title">Products</h2>
-          <button @click="openModal('add')" class="admin-button">
+          <button 
+            @click="openModal('add')"
+            class="admin-button"
+          >
             <PlusIcon class="admin-button-icon" />
             Add Product
           </button>
@@ -43,7 +46,7 @@
               <tr v-for="product in products" :key="product.prodID" class="admin-tr">
                 <td class="admin-td">
                   <div class="admin-product-cell">
-                    <img :src="product.mainImage" alt="" class="admin-product-image" />
+                    <img :src="product.mainImage" alt="" class="admin-product-image">
                     <div>
                       <div class="admin-product-name">{{ product.prodName }}</div>
                       <div class="admin-product-id">ID: {{ product.prodID }}</div>
@@ -58,16 +61,10 @@
                   </span>
                 </td>
                 <td class="admin-td text-right">
-                  <button
-                    @click="openModal('edit', product)"
-                    class="admin-action-button text-blue-600"
-                  >
+                  <button @click="openModal('edit', product)" class="admin-action-button text-blue-600">
                     <EditIcon class="admin-action-icon" />
                   </button>
-                  <button
-                    @click="deleteProduct(product.prodID)"
-                    class="admin-action-button text-red-600"
-                  >
+                  <button @click="deleteProduct(product.prodID)" class="admin-action-button text-red-600">
                     <TrashIcon class="admin-action-icon" />
                   </button>
                 </td>
@@ -81,130 +78,83 @@
     <!-- Modal -->
     <div v-if="showModal" class="admin-modal-overlay">
       <div class="admin-modal">
-        <h2 class="admin-modal-title">
-          {{ modalMode === 'add' ? 'Add New Product' : 'Edit Product' }}
-        </h2>
+        <h2 class="admin-modal-title">{{ modalMode === 'add' ? 'Add New Product' : 'Edit Product' }}</h2>
         <form @submit.prevent="submitForm" class="admin-form">
           <div class="admin-form-group">
             <label for="prodName" class="admin-label">Product Name</label>
-            <input
-              v-model="currentProduct.prodName"
-              id="prodName"
-              type="text"
-              required
-              class="admin-input"
-            />
+            <input v-model="currentProduct.prodName" id="prodName" type="text" required class="admin-input">
           </div>
           <div class="admin-form-row">
             <div class="admin-form-group">
               <label for="price" class="admin-label">Price</label>
-              <input
-                v-model="currentProduct.price"
-                id="price"
-                type="number"
-                step="0.01"
-                required
-                class="admin-input"
-              />
+              <input v-model="currentProduct.price" id="price" type="number" step="0.01" required class="admin-input">
             </div>
             <div class="admin-form-group">
               <label for="stock" class="admin-label">Stock</label>
-              <input
-                v-model="currentProduct.stock"
-                id="stock"
-                type="number"
-                required
-                class="admin-input"
-              />
+              <input v-model="currentProduct.stock" id="stock" type="number" required class="admin-input">
             </div>
           </div>
           <div class="admin-form-group">
             <label for="description" class="admin-label">Description</label>
-            <textarea
-              v-model="currentProduct.description"
-              id="description"
-              rows="3"
-              class="admin-textarea"
-            ></textarea>
+            <textarea v-model="currentProduct.description" id="description" rows="3" class="admin-textarea"></textarea>
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-label">Product Status</label>
-            <div class="flex gap-4">
-              <label>
-                <input
-                  type="radio"
-                  v-model="currentProduct.prodStatus"
-                  value="Available"
-                  class="admin-radio-input"
-                />
-                Available
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  v-model="currentProduct.prodStatus"
-                  value="Unavailable"
-                  class="admin-radio-input"
-                />
-                Unavailable
-              </label>
-            </div>
+          <label class="admin-label">Product Status</label>
+          <div class="flex gap-4">
+            <label>
+              <input
+                type="radio"
+                v-model="currentProduct.prodStatus"
+                value="Available"
+                class="admin-radio-input"
+              />
+              Available
+            </label>
+            <span>&nbsp;&nbsp;&nbsp;</span>
+            <label>
+              <input
+                type="radio"
+                v-model="currentProduct.prodStatus"
+                value="Unavailable"
+                class="admin-radio-input"
+              />
+              Unavailable
+            </label>
+          </div>
+        </div>
+        <div class="admin-form-group">
+          <label for="category" class="admin-label">Category</label>
+          <select v-model="currentProduct.catID" id="category" class="admin-input" required>
+            <option value="" disabled>Select a category</option>
+            <option v-for="category in categories" :key="category.catID" :value="category.catID">
+              {{ category.catName }}
+            </option>
+          </select>
+        </div>
+        <div class="admin-form-row">
+          <div class="admin-form-group">
+            <label for="processor" class="admin-label">Processor</label>
+            <input v-model="currentProduct.processor" id="processor" type="text" class="admin-input" placeholder="e.g., Intel i5">
           </div>
           <div class="admin-form-group">
-            <label for="category" class="admin-label">Category</label>
-            <select v-model="currentProduct.catID" id="category" class="admin-input" required>
-              <option value="" disabled>Select a category</option>
-              <option v-for="category in categories" :key="category.catID" :value="category.catID">
-                {{ category.catName }}
-              </option>
-            </select>
+            <label for="ram" class="admin-label">RAM</label>
+            <input v-model="currentProduct.ram" id="ram" type="text" class="admin-input" placeholder="e.g., 8GB">
           </div>
-          <div class="admin-form-row">
-            <div class="admin-form-group">
-              <label for="processor" class="admin-label">Processor</label>
-              <input
-                v-model="currentProduct.processor"
-                id="processor"
-                type="text"
-                class="admin-input"
-                placeholder="e.g., Intel i5"
-              />
-            </div>
-            <div class="admin-form-group">
-              <label for="ram" class="admin-label">RAM</label>
-              <input
-                v-model="currentProduct.ram"
-                id="ram"
-                type="text"
-                class="admin-input"
-                placeholder="e.g., 8GB"
-              />
-            </div>
-            <div class="admin-form-group">
-              <label for="storage" class="admin-label">Storage</label>
-              <input
-                v-model="currentProduct.storage"
-                id="storage"
-                type="text"
-                class="admin-input"
-                placeholder="e.g., 256GB SSD"
-              />
-            </div>
+          <div class="admin-form-group">
+            <label for="storage" class="admin-label">Storage</label>
+            <input v-model="currentProduct.storage" id="storage" type="text" class="admin-input" placeholder="e.g., 256GB SSD">
           </div>
+        </div>
 
           <div class="admin-form-group">
             <label for="mainImage" class="admin-label">Image URL</label>
-            <input
-              v-model="currentProduct.mainImage"
-              id="mainImage"
-              type="url"
-              class="admin-input"
-              placeholder="https://example.com/image.jpg"
-            />
+            <input v-model="currentProduct.mainImage" id="mainImage" type="url" class="admin-input" placeholder="https://example.com/image.jpg">
           </div>
           <div class="admin-modal-footer">
-            <button type="button" @click="closeModal" class="admin-button-secondary">Cancel</button>
+            <button type="button" @click="closeModal" class="admin-button-secondary">
+              Cancel
+            </button>
             <button type="submit" class="admin-button-primary">
               {{ modalMode === 'add' ? 'Add Product' : 'Update Product' }}
             </button>
@@ -217,22 +167,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import {
-  PlusIcon,
-  EditIcon,
-  TrashIcon,
-  HomeIcon,
-  BoxIcon,
-  ShoppingCartIcon,
-  UsersIcon,
-  BarChartIcon,
-  SettingsIcon,
-} from 'lucide-vue-next'
+import { PlusIcon, EditIcon, TrashIcon, HomeIcon, BoxIcon, FolderIcon, ShoppingCartIcon, UsersIcon, BarChartIcon, SettingsIcon } from 'lucide-vue-next'
 
 const currentSection = ref('Products')
 const navigationItems = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Products', href: '/admin/products', icon: BoxIcon },
+  { name: 'Categories', href: '/admin/categories', icon: FolderIcon },
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCartIcon },
   { name: 'Customers', href: '/admin/customers', icon: UsersIcon },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChartIcon },
@@ -265,13 +206,13 @@ const fetchProducts = async () => {
 
 const fetchCategories = async () => {
   try {
-    const response = await fetch(categoryApiUrl)
-    if (!response.ok) throw new Error('Network response was not ok')
-    categories.value = await response.json()
+    const response = await fetch(categoryApiUrl);
+    if (!response.ok) throw new Error('Network response was not ok');
+    categories.value = await response.json();
   } catch (error) {
-    console.error('Error fetching categories:', error)
+    console.error('Error fetching categories:', error);
   }
-}
+};
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(price)
@@ -290,24 +231,21 @@ const getStatusClass = (status) => {
 }
 
 const openModal = (mode, product = {}) => {
-  modalMode.value = mode
-  currentProduct.value =
-    mode === 'edit'
-      ? { ...product }
-      : {
-          prodName: '',
-          price: '',
-          stock: '',
-          prodStatus: 'Available',
-          mainImage: '',
-          description: '',
-          catID: '',
-          processor: '',
-          ram: '',
-          storage: '',
-        }
-  showModal.value = true
-}
+  modalMode.value = mode;
+  currentProduct.value = mode === 'edit' ? { ...product } : {
+    prodName: '',
+    price: '',
+    stock: '',
+    prodStatus: 'Available',
+    mainImage: '',
+    description: '',
+    catID: '',
+    processor: '',
+    ram: '',
+    storage: '',
+  };
+  showModal.value = true;
+};
 
 const closeModal = () => {
   showModal.value = false
@@ -318,7 +256,7 @@ const submitForm = async () => {
   try {
     const method = modalMode.value === 'add' ? 'POST' : 'PUT'
     const url = modalMode.value === 'add' ? apiUrl : `${apiUrl}/${currentProduct.value.prodID}`
-
+    
     const response = await fetch(url, {
       method: method,
       headers: {
@@ -328,7 +266,7 @@ const submitForm = async () => {
     })
 
     if (!response.ok) throw new Error('Network response was not ok')
-
+    
     await fetchProducts()
     closeModal()
   } catch (error) {
@@ -344,7 +282,7 @@ const deleteProduct = async (prodID) => {
       })
 
       if (!response.ok) throw new Error('Network response was not ok')
-
+      
       await fetchProducts()
     } catch (error) {
       console.error('Error deleting product:', error)
@@ -670,13 +608,14 @@ const deleteProduct = async (prodID) => {
 }
 
 .admin-modal {
-  max-height: 80vh;
-  overflow-y: auto;
+  max-height: 80vh; 
+  overflow-y: auto; 
 }
 
 .admin-td {
-  white-space: nowrap;
+  white-space: nowrap; 
   overflow: hidden;
   text-overflow: ellipsis;
-}
+};
+
 </style>
