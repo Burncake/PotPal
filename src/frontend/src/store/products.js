@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia';
 
+import { defineStore } from 'pinia';
 const fakeStoreUrl = 'https://6754193836bcd1eec85023b2.mockapi.io/api';
 
 export const useProductStore = defineStore({
