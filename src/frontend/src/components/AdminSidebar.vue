@@ -20,7 +20,6 @@
 import { ref } from 'vue'
 import { HomeIcon, BoxIcon, FolderIcon, ShoppingCartIcon, UsersIcon, BarChartIcon, SettingsIcon } from 'lucide-vue-next'
 
-const currentSection = ref('Products')
 const navigationItems = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Products', href: '/admin/products', icon: BoxIcon },
@@ -32,7 +31,7 @@ const navigationItems = [
 ]
 </script>
 
-<style scoped>
+<style>
 .admin-sidebar {
   width: 250px;
   background: white;
