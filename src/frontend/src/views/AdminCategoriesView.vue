@@ -291,6 +291,7 @@ const deleteProduct = async (prodID) => {
 }
 
 .admin-main {
+  width: 502px;
   padding: 1.5rem;
 }
 
