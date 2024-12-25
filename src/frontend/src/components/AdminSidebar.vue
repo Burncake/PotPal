@@ -40,6 +40,7 @@ const navigationItems = [
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  height: 100%;
 }
 
 .admin-nav-container {
