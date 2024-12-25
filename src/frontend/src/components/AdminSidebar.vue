@@ -40,11 +40,6 @@ const navigationItems = [
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  height: calc(100vh - 60px); /* Subtract navbar height */
-  position: fixed;
-  left: 0;
-  top: 60px; /* Match navbar height */
-  z-index: 10;
 }
 
 .admin-nav-container {
