@@ -158,16 +158,6 @@ import { ref, onMounted } from 'vue'
 import { PlusIcon, EditIcon, TrashIcon, HomeIcon, BoxIcon, FolderIcon, ShoppingCartIcon, UsersIcon, BarChartIcon, SettingsIcon } from 'lucide-vue-next'
 
 const currentSection = ref('Products')
-const navigationItems = [
-  { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-  { name: 'Products', href: '/admin/products', icon: BoxIcon },
-  { name: 'Categories', href: '/admin/categories', icon: FolderIcon },
-  { name: 'Orders', href: '/admin/orders', icon: ShoppingCartIcon },
-  { name: 'Customers', href: '/admin/customers', icon: UsersIcon },
-  { name: 'Analytics', href: '/admin/analytics', icon: BarChartIcon },
-  { name: 'Settings', href: '/admin/settings', icon: SettingsIcon },
-]
-
 const products = ref([])
 const categories = ref([])
 const showModal = ref(false)
