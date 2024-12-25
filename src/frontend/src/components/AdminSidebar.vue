@@ -19,7 +19,7 @@
 <script setup>
 import { ref } from 'vue'
 import { HomeIcon, BoxIcon, FolderIcon, ShoppingCartIcon, UsersIcon, BarChartIcon, SettingsIcon } from 'lucide-vue-next'
-const currentSection = ref('Products');
+const currentSection = ref('Products')
 const navigationItems = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Products', href: '/admin/products', icon: BoxIcon },
