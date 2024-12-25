@@ -268,7 +268,3 @@ const deleteProduct = async (prodID) => {
   }
 }
 </script>
-
-<style scoped>
-
-</style>
