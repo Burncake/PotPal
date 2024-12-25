@@ -6,8 +6,8 @@
         :key="item.name"
         :to="item.href"
         class="admin-nav-item"
-        :class="{ 'admin-nav-item-active': this.$currentSection === item.name }"
-        @click.prevent="this.$currentSection = item.name"
+        :class="{ 'admin-nav-item-active': currentSection === item.name }"
+        @click.prevent="currentSection = item.name"
       >
         <component :is="item.icon" class="admin-nav-icon" />
         <span>{{ item.name }}</span>
