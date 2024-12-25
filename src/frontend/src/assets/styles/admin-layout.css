@@ -273,3 +273,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
 };
+
+.admin-category-cell {
+  display: flex;
+  align-items: center;
+}
+
+.admin-category-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.admin-category-id {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
