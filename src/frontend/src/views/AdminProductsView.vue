@@ -292,7 +292,7 @@ const deleteProduct = async (prodID) => {
 }
 </script>
 
-<style>
+<style scoped>
 .admin-sidebar {
   width: 250px;
   background: white;
