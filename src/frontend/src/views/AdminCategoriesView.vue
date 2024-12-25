@@ -281,7 +281,7 @@ const deleteProduct = async (prodID) => {
 <style scoped>
 .admin-layout {
   display: flex;
-  min-height: calc(100vh - 60px); /* Adjust based on your navbar height */
+  
   background-color: #f8f9fa;
 }
 
