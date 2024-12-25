@@ -1,4 +1,4 @@
-import { createApp, ref } from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
 import { createPinia } from 'pinia'
 import Toast from 'vue-toastification'
@@ -9,8 +9,6 @@ import router from './router'
 // window.mdb = mdb
 // import 'mdb-ui-kit/css/mdb.min.css'
 const app = createApp(App)
-app.config.globalProperties.$currentSection = ref("");
-
 const pinia = createPinia()
 
 app.use(pinia)
