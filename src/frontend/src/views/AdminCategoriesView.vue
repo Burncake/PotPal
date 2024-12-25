@@ -1,21 +1,7 @@
 <template>
   <div class="admin-layout">
     <!-- Admin Sidebar -->
-    <aside class="admin-sidebar">
-      <div class="admin-nav-container">
-        <router-link
-          v-for="item in navigationItems"
-          :key="item.name"
-          :to="item.href"
-          class="admin-nav-item"
-          :class="{ 'admin-nav-item-active': currentSection === item.name }"
-          @click.prevent="currentSection = item.name"
-        >
-          <component :is="item.icon" class="admin-nav-icon" />
-          <span>{{ item.name }}</span>
-        </router-link>
-      </div>
-    </aside>
+    <AdminSidebar />
 
     <!-- Main Content -->
     <div class="admin-content">
@@ -166,6 +152,7 @@
 </template>
 
 <script setup>
+import AdminSidebar from '@/components/AdminSidebar.vue'
 import { ref, onMounted } from 'vue'
 import { PlusIcon, EditIcon, TrashIcon, HomeIcon, BoxIcon, FolderIcon, ShoppingCartIcon, UsersIcon, BarChartIcon, SettingsIcon } from 'lucide-vue-next'
 
@@ -296,56 +283,6 @@ const deleteProduct = async (prodID) => {
   display: flex;
   min-height: calc(100vh - 60px); /* Adjust based on your navbar height */
   background-color: #f8f9fa;
-}
-
-.admin-sidebar {
-  width: 250px;
-  background: white;
-  border-right: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.admin-sidebar-header {
-  padding: 1.25rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.admin-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.admin-nav-container {
-  padding: 1rem 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.admin-nav-item {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  color: #4b5563;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.admin-nav-item:hover {
-  background-color: #f3f4f6;
-}
-
-.admin-nav-item-active {
-  background-color: #f3f4f6;
-  color: #2563eb;
-}
-
-.admin-nav-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-right: 0.75rem;
 }
 
 .admin-content {
