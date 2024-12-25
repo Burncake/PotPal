@@ -9,6 +9,8 @@ import router from './router'
 // window.mdb = mdb
 // import 'mdb-ui-kit/css/mdb.min.css'
 const app = createApp(App)
+app.config.globalProperties.$currentSection;
+
 const pinia = createPinia()
 
 app.use(pinia)
