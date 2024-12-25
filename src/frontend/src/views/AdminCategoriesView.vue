@@ -157,7 +157,6 @@ import AdminSidebar from '@/components/AdminSidebar.vue'
 import { ref, onMounted } from 'vue'
 import { PlusIcon, EditIcon, TrashIcon, HomeIcon, BoxIcon, FolderIcon, ShoppingCartIcon, UsersIcon, BarChartIcon, SettingsIcon } from 'lucide-vue-next'
 
-const currentSection = ref('Categories')
 const products = ref([])
 const categories = ref([])
 const showModal = ref(false)
