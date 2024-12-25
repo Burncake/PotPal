@@ -281,8 +281,9 @@ const deleteProduct = async (prodID) => {
 <style scoped>
 .admin-layout {
   display: flex;
-  
+  min-height: calc(100vh - 60px);
   background-color: #f8f9fa;
+  margin-top: 60px;
 }
 
 .admin-content {
