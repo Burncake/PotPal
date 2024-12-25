@@ -1,8 +1,7 @@
 <template>
-  <AdminSidebar />
   <div class="admin-layout">
     <!-- Admin Sidebar -->
-    
+    <AdminSidebar />
 
     <!-- Main Content -->
     <div class="admin-content">
