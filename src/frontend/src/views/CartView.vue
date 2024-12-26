@@ -1,160 +1,295 @@
-<script>
-import { CartStore } from '@/store/Cart'
-import { useToast } from 'vue-toastification'
-
-export default {
-  setup() {
-    const cartStore = CartStore()
-
-    const toast = useToast()
-
-    return { cartStore, toast }
-  },
-  data() {
-    return {
-      // products: this.cartStore.products,
-      quant: 1,
-    }
-  },
-  mounted() {
-    this.cartStore.loadCart()
-  },
-  computed: {
-    items() {
-      if (this.cartStore.cart === null) return []
-      return this.cartStore.cart
-    },
-  },
-
-  methods: {
-    updateCart(itemID, quant) {
-      this.cartStore.updateQuantity(itemID, quant)
-      this.cartStore.postCart()
-    },
-    processCart() {
-      this.cartStore.postCart()
-    },
-    removeItem(itemID) {
-      this.cartStore.updateQuantity(itemID, 0)
-      this.cartStore.postCart()
-
-      this.toast.info('Item removed from cart', {
-        timeout: 1000,
-      })
-    },
-  },
-}
-</script>
-
 <template>
-  <section class="">
-    <div class="container h-100 py-5">
-      <div class="row d-flex justify-content-center align-items-center h-100">
-        <div class="col-10">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-normal mb-0">My Cart</h3>
-            <!-- <div>
-              <p class="mb-0">
-                <span class="text-muted">Sort by:</span>
-                <a href="#!" class="text-body">price <i class="fas fa-angle-down mt-1"></i></a>
-              </p>
-            </div> -->
-          </div>
-          <template v-for="item in items" :key="item.id">
-            <template v-if="item.quantity !== 0">
-              <div class="card rounded-3 mb-4">
-                <div class="card-body p-4">
-                  <div class="row d-flex justify-content-between align-items-center">
-                    <div class="col-md-2 col-lg-2 col-xl-2">
-                      <img :src="item.mainImage" class="img-fluid rounded-3" :alt="item.prodName" />
-                    </div>
-                    <div class="col-md-3 col-lg-3 col-xl-3">
-                      <p class="lead fw-normal mb-2">{{ item.prodName }}</p>
-                      <!-- <p>
-                      <span class="text-muted">Size: </span>M
-                      <span class="text-muted">Color: </span>Grey
-                    </p> -->
-                    </div>
-                    <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                      <button
-                        data-mdb-button-init
-                        data-mdb-ripple-init
-                        class="btn btn-link px-2"
-                        @click="item.quantity > 1 ? item.quantity-- : 1"
-                      >
-                        <i class="fas fa-minus"></i>
-                      </button>
-
-                      <input
-                        id="form1"
-                        min="1"
-                        name="quantity"
-                        v-model="item.quantity"
-                        type="numeric"
-                        class="form-control form-control-sm text-center"
-                      />
-
-                      <button
-                        data-mdb-button-init
-                        data-mdb-ripple-init
-                        class="btn btn-link px-2"
-                        @click="item.quantity++, updateCart(item.id, item.quantity)"
-                      >
-                        <i class="fas fa-plus"></i>
-                      </button>
-                    </div>
-                    <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                      <h5 class="mb-0">{{ item.price }} VND</h5>
-                    </div>
-                    <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                      <a class="text-danger" @click="removeItem(item.id)"
-                        ><i class="fas fa-trash fa-lg"></i
-                      ></a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </template>
-
-          <div class="card mb-4">
-            <div class="card-body p-4 d-flex flex-row">
-              <div data-mdb-input-init class="form-outline flex-fill">
-                <input type="text" id="form1" class="form-control form-control-lg" />
-                <label class="form-label" for="form1">Discound code</label>
-              </div>
-              <button
-                type="button"
-                data-mdb-button-init
-                data-mdb-ripple-init
-                class="btn btn-outline-warning btn-lg ms-3"
-              >
-                Apply
-              </button>
+  <div class="cart-view">
+    <h1 class="cart-title">{{ customerName }}'s Cart</h1>
+    
+    <div v-if="cartDetails.length > 0" class="cart-list">
+      <div v-for="(cart, index) in cartDetails" :key="cart.cartID" class="cart">
+        <div class="cart-header">
+          <h2 class="cart-id">Cart: {{ cart.cartID }}</h2>
+        </div>
+        
+        <div class="cart-items">
+          <div v-for="(item, idx) in cart.cartsDetail" :key="idx" class="cart-item">
+            <div class="product-image-container">
+              <img :src="getProductImage(item.prodID)" alt="Product Image" class="product-image" />
             </div>
-          </div>
-
-          <div class="card">
-            <div class="card-body">
-              <button
-                type="button"
-                data-mdb-button-init
-                data-mdb-ripple-init
-                class="btn btn-warning btn-block btn-lg"
-                @click="processCart"
-              >
-                Proceed to Pay
-              </button>
+            
+            <div class="product-info">
+              <h3 class="product-name">{{ getProductName(item.prodID) }}</h3>
+              <p class="product-description">{{ getProductDescription(item.prodID) }}</p>
+              
+              <div class="product-details">
+                <p><strong>Price:</strong> {{ getProductPrice(item.prodID) | currency }}</p>
+                
+                <div class="quantity-controls">
+                  <button @click="decreaseQuantity(cart.cartID, item.prodID)" :disabled="item.quantity <= 1">-</button>
+                  <span class="quantity">{{ item.quantity }}</span>
+                  <button @click="increaseQuantity(cart.cartID, item.prodID)" :disabled="item.quantity >= getProductStock(item.prodID)">+</button>
+                </div>
+                
+                <p><strong>Total:</strong> {{ getProductPrice(item.prodID) * item.quantity | currency }}</p>
+                
+                <button @click="removeProductFromCart(cart.cartID, item.prodID)" class="remove-product-button">
+                  <i class="fa fa-trash"></i> Remove
+                </button>
+              </div>
             </div>
           </div>
         </div>
+        
+        <hr />
+      </div>
+      
+      <div class="cart-summary">
+        <h3>Total: {{ calculateTotalAmount(cartDetails) | currency }}</h3>
       </div>
     </div>
-  </section>
+    
+    <div v-else>
+      <p class="empty-cart">The cart is empty.</p>
+    </div>
+  </div>
 </template>
 
+<script>
+export default {
+  data() {
+    return {
+      customerID: '00001', // Example, you can change this value or receive it from props or route params.
+      customerName: '', // To store the fullName of the customer
+      cartData: [], // Cart data from API
+      productData: [], // Product data from API
+      userData: [], // User data from API
+    };
+  },
+  computed: {
+    cartDetails() {
+      return this.cartData.filter(cart => cart.customerID === this.customerID);
+    }
+  },
+  methods: {
+    async fetchCartData() {
+      const cartResponse = await fetch('https://67628fc046efb373237507fb.mockapi.io/carts');
+      this.cartData = await cartResponse.json();
+    },
+    async fetchProductData() {
+      const productResponse = await fetch('https://6754193836bcd1eec85023b2.mockapi.io/api/products');
+      this.productData = await productResponse.json();
+    },
+    async fetchUserData() {
+      const userResponse = await fetch('https://67628fc046efb373237507fb.mockapi.io/user');
+      this.userData = await userResponse.json();
+      const user = this.userData.find(user => user.userID === this.customerID);
+      this.customerName = user ? user.fullName : 'Unknown Customer'; // Set the customerName
+    },
+    getProductName(prodID) {
+      const product = this.productData.find(product => product.prodID === prodID);
+      return product ? product.prodName : 'Product name not found';
+    },
+    getProductDescription(prodID) {
+      const product = this.productData.find(product => product.prodID === prodID);
+      return product ? product.description : 'No description available';
+    },
+    getProductPrice(prodID) {
+      const product = this.productData.find(product => product.prodID === prodID);
+      return product ? product.price : 0;
+    },
+    getProductImage(prodID) {
+      const product = this.productData.find(product => product.prodID === prodID);
+      return product ? product.mainImage : '';
+    },
+    getProductStock(prodID) {
+      const product = this.productData.find(product => product.prodID === prodID);
+      return product ? product.stock : 0;
+    },
+    calculateTotalAmount(cartDetails) {
+      return cartDetails.reduce((total, cart) => {
+        return total + cart.cartsDetail.reduce((cartTotal, item) => {
+          return cartTotal + (this.getProductPrice(item.prodID) * item.quantity);
+        }, 0);
+      }, 0);
+    },
+    async updateCart(cartID, prodID, quantity) {
+      const cart = this.cartData.find(cart => cart.cartID === cartID);
+      const cartItem = cart.cartsDetail.find(item => item.prodID === prodID);
+      if (cartItem) {
+        cartItem.quantity = quantity;
+      }
+      await fetch(`https://67628fc046efb373237507fb.mockapi.io/carts/${cartID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cart),
+      });
+    },
+    increaseQuantity(cartID, prodID) {
+      const cart = this.cartData.find(cart => cart.cartID === cartID);
+      const cartItem = cart.cartsDetail.find(item => item.prodID === prodID);
+      if (cartItem && cartItem.quantity < this.getProductStock(prodID)) {
+        cartItem.quantity++;
+        this.updateCart(cartID, prodID, cartItem.quantity);
+      }
+    },
+    decreaseQuantity(cartID, prodID) {
+      const cart = this.cartData.find(cart => cart.cartID === cartID);
+      const cartItem = cart.cartsDetail.find(item => item.prodID === prodID);
+      if (cartItem && cartItem.quantity > 1) {
+        cartItem.quantity--;
+        this.updateCart(cartID, prodID, cartItem.quantity);
+      }
+    },
+    async removeProductFromCart(cartID, prodID) {
+      const cart = this.cartData.find(cart => cart.cartID === cartID);
+      const cartItemIndex = cart.cartsDetail.findIndex(item => item.prodID === prodID);
+      if (cartItemIndex !== -1) {
+        cart.cartsDetail.splice(cartItemIndex, 1); // Remove the product from cart
+        await fetch(`https://67628fc046efb373237507fb.mockapi.io/carts/${cartID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(cart),
+        });
+      }
+    },
+  },
+  filters: {
+    currency(value) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    }
+  },
+  mounted() {
+    this.fetchCartData();
+    this.fetchProductData();
+    this.fetchUserData(); // Fetch user data when the component is mounted
+  }
+};
+</script>
+
 <style scoped>
-a.text-danger:hover {
+.cart-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.cart-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  color: #333;
+}
+
+.cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cart {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.cart-header {
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.cart-id {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cart-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.product-image-container {
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.product-info {
+  flex-grow: 1;
+}
+
+.product-name {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.product-description {
+  font-size: 1rem;
+  color: #777;
+}
+
+.product-details {
+  margin-top: 15px;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.quantity {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.remove-product-button {
+  margin-top: 15px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.remove-product-button i {
+  margin-right: 8px;
+}
+
+.remove-product-button:hover {
+  background-color: #c0392b;
+}
+
+.cart-summary {
+  text-align: right;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.empty-cart {
+  text-align: center;
+  font-size: 1.25rem;
+  color: #888;
 }
 </style>
