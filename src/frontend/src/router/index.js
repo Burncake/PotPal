@@ -12,6 +12,8 @@ import AdminCategoriesView from '@/views/AdminCategoriesView.vue'
 import CartView from '@/views/CartView.vue'
 import AdminCustomerView from '@/views/AdminCustomerView.vue'
 import AdminDashboard from '@/views/AdminDashboard.vue'
+import OrdersView from '@/views/OrdersView.vue'
+import OrderDetails from '@/views/OrderDetails.vue'
 const routes = [
   {
     path: '/',
@@ -27,6 +29,11 @@ const routes = [
     path: '/product/:id',
     name: 'productDetails',
     component: ProductDetailsPage,
+  },
+  {
+    path: '/order-detail/:orderID',
+    name: 'OrderDetails',
+    component: OrderDetails, // Replace with your component name
   },
   {
     path: '/contact',
@@ -52,6 +59,11 @@ const routes = [
     path: '/admin',
     name: 'admin',
     component: AdminDashboard,
+  },
+  {
+    path: '/orders',
+    name: 'orders',
+    component: OrdersView,
   },
   {
     path: '/admin/products',
