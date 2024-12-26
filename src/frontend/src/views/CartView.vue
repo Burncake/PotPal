@@ -5,33 +5,40 @@
     <div v-if="cartDetails.length > 0" class="cart-list">
       <div v-for="(cart, index) in cartDetails" :key="cart.cartID" class="cart">
         <div class="cart-header">
-          <h2 class="cart-id">Cart: {{ cart.cartID }}</h2>
+          <!-- Removed cartID display -->
+          <h2 class="cart-id"></h2>
         </div>
         
         <div class="cart-items">
-          <div v-for="(item, idx) in cart.cartsDetail" :key="idx" class="cart-item">
-            <div class="product-image-container">
-              <img :src="getProductImage(item.prodID)" alt="Product Image" class="product-image" />
-            </div>
-            
-            <div class="product-info">
-              <h3 class="product-name">{{ getProductName(item.prodID) }}</h3>
-              <p class="product-description">{{ getProductDescription(item.prodID) }}</p>
+          <!-- Check if there are items in cart.cartsDetail -->
+          <div v-if="cart.cartsDetail.length === 0">
+            <p class="empty-cart">This cart is empty.</p>
+          </div>
+          <div v-else>
+            <div v-for="(item, idx) in cart.cartsDetail" :key="idx" class="cart-item">
+              <div class="product-image-container">
+                <img :src="getProductImage(item.prodID)" alt="Product Image" class="product-image" />
+              </div>
               
-              <div class="product-details">
-                <p><strong>Price:</strong> {{ getProductPrice(item.prodID) | currency }}</p>
+              <div class="product-info">
+                <h3 class="product-name">{{ getProductName(item.prodID) }}</h3>
+                <p class="product-description">{{ getProductDescription(item.prodID) }}</p>
                 
-                <div class="quantity-controls">
-                  <button @click="decreaseQuantity(cart.cartID, item.prodID)" :disabled="item.quantity <= 1">-</button>
-                  <span class="quantity">{{ item.quantity }}</span>
-                  <button @click="increaseQuantity(cart.cartID, item.prodID)" :disabled="item.quantity >= getProductStock(item.prodID)">+</button>
+                <div class="product-details">
+                  <p><strong>Price:</strong> {{ getProductPrice(item.prodID) | currency }}</p>
+                  
+                  <div class="quantity-controls">
+                    <button @click="decreaseQuantity(cart.cartID, item.prodID)" :disabled="item.quantity <= 1">-</button>
+                    <span class="quantity">{{ item.quantity }}</span>
+                    <button @click="increaseQuantity(cart.cartID, item.prodID)" :disabled="item.quantity >= getProductStock(item.prodID)">+</button>
+                  </div>
+                  
+                  <p><strong>Total:</strong> {{ getProductPrice(item.prodID) * item.quantity | currency }}</p>
+                  
+                  <button @click="removeProductFromCart(cart.cartID, item.prodID)" class="remove-product-button">
+                    <i class="fa fa-trash"></i> Remove
+                  </button>
                 </div>
-                
-                <p><strong>Total:</strong> {{ getProductPrice(item.prodID) * item.quantity | currency }}</p>
-                
-                <button @click="removeProductFromCart(cart.cartID, item.prodID)" class="remove-product-button">
-                  <i class="fa fa-trash"></i> Remove
-                </button>
               </div>
             </div>
           </div>
@@ -43,6 +50,13 @@
       <div class="cart-summary">
         <h3>Total: {{ calculateTotalAmount(cartDetails) | currency }}</h3>
       </div>
+      
+      <!-- Make Order Button (only shown if there are products in the cart) -->
+      <div class="make-order-button-container" v-if="cartDetails.some(cart => cart.cartsDetail.length > 0)">
+        <button @click="goToPaymentPage" class="make-order-button">
+          Make Order
+        </button>
+      </div>
     </div>
     
     <div v-else>
@@ -51,11 +65,13 @@
   </div>
 </template>
 
+
+
 <script>
 export default {
   data() {
     return {
-      customerID: '00001', // Example, you can change this value or receive it from props or route params.
+      customerID: '00001', // Example customer ID
       customerName: '', // To store the fullName of the customer
       cartData: [], // Cart data from API
       productData: [], // Product data from API
@@ -152,6 +168,16 @@ export default {
           body: JSON.stringify(cart),
         });
       }
+    },
+    goToPaymentPage() {
+      const totalCost = this.calculateTotalAmount(this.cartDetails);
+      this.$router.push({ 
+        name: 'payment', 
+        query: { 
+          username: this.customerName, 
+          totalCost: totalCost
+        } 
+      });
     },
   },
   filters: {
@@ -284,12 +310,32 @@ export default {
 .cart-summary {
   text-align: right;
   font-size: 1.25rem;
-  font-weight: bold;
+  margin-top: 15px;
+}
+
+.make-order-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.make-order-button {
+  background-color: #3498db;
+  color: white;
+  padding: 12px 30px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.make-order-button:hover {
+  background-color: #2980b9;
 }
 
 .empty-cart {
   text-align: center;
-  font-size: 1.25rem;
-  color: #888;
+  font-size: 1.2rem;
+  color: #777;
 }
 </style>

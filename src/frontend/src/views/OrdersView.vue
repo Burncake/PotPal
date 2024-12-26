@@ -18,7 +18,6 @@
             <div class="d-flex justify-content-between align-items-center">
               <p><strong>Status:</strong> {{ order.orderStatus }}</p>
               <div class="status-image">
-                <!-- Status images based on order status -->
                 <img v-if="order.orderStatus === 'Canceled'" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROM00hI5cx6U1J8cDbk_LaCh3V7JvB32Okkg&s" alt="Canceled" class="status-icon" />
                 <img v-if="order.orderStatus === 'Processing'" src="https://i.imgflip.com/4rkzip.jpg" alt="Processing" class="status-icon" />
                 <img v-if="order.orderStatus === 'Shipping'" src="https://i.pinimg.com/474x/b6/4d/fc/b64dfcfdb6e0c65dc24104121116d387.jpg" alt="Shipping" class="status-icon" />
@@ -44,10 +43,9 @@
         <p>No orders found for this customer.</p>
       </div>
     </div>
-  </template>
-  
-  
-  <script>
+</template>
+
+<script>
 export default {
   data() {
     return {
@@ -67,7 +65,10 @@ export default {
       fetch("https://676d499b0e299dd2ddff0c39.mockapi.io/orders/orders")
         .then((response) => response.json())
         .then((data) => {
+          // Filter orders based on userID
           this.orders = data.filter((order) => order.userID === this.userID);
+          // Sort orders by orderID in descending order
+          this.orders.sort((a, b) => b.orderID.localeCompare(a.orderID));
           this.loading = false;
         })
         .catch((error) => {
@@ -81,12 +82,12 @@ export default {
       return new Date(date).toLocaleDateString(undefined, options);
     },
     viewOrderDetail(orderID) {
-      this.$router.push(`/order-detail/${orderID}`);
+      this.$router.push(`/order/${orderID}`);
     },
   },
 };
 </script>
-  
+
 <style scoped>
 .container {
   max-width: 800px;
