@@ -1,4 +1,3 @@
-
 <template>
     <div class="container mt-5 pt-3">
         <h3 class="text-center mb-4">Featured Products</h3>
@@ -29,14 +28,15 @@ export default {
         };
     },
     mounted() {
-        fetch("https://6754193836bcd1eec85023b2.mockapi.io/api/products")
-            .then(response => response.json())
-            .then(data => {
-                this.featuredProducts = data.slice(0, 4);
-            })
-            .catch(error => {
-                console.error("Error fetching featured products:", error);
-            });
+    fetch("https://6754193836bcd1eec85023b2.mockapi.io/api/products")
+        .then(response => response.json())
+        .then(data => {
+            console.log("Home Featured product Fetched Data:", data); // In toàn bộ dữ liệu lên console
+            this.featuredProducts = data.slice(0, 4);
+        })
+        .catch(error => {
+            console.error("Error fetching featured products:", error);
+        });
     }
 }
 </script>

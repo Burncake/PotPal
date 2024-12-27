@@ -9,6 +9,13 @@ import LoginView from '../views/LoginView.vue'
 import SignupView from '../views/RegisterView.vue'
 import AdminProductsView from '@/views/AdminProductsView.vue'
 import AdminCategoriesView from '@/views/AdminCategoriesView.vue'
+import CartView from '@/views/CartView.vue'
+import AdminCustomerView from '@/views/AdminCustomerView.vue'
+import AdminDashboard from '@/views/AdminDashboard.vue'
+import OrdersView from '@/views/OrdersView.vue'
+import OrderDetails from '@/views/OrderDetails.vue'
+import PaymentView from '@/views/PaymentView.vue'
+import AdminOrdersView from '@/views/AdminOrdersView.vue'
 const routes = [
   {
     path: '/',
@@ -26,6 +33,11 @@ const routes = [
     component: ProductDetailsPage,
   },
   {
+    path: '/order/:orderID',
+    name: 'OrderDetails',
+    component: OrderDetails, // Replace with your component name
+  },
+  {
     path: '/contact',
     name: 'ContactPage',
     component: ContactPage,
@@ -34,6 +46,11 @@ const routes = [
     path: '/category/:catID',
     name: 'ProductCategory',
     component: ProductCategory,
+  },
+  {
+    path: '/payment',
+    name: 'payment',
+    component: PaymentView
   },
   {
     path: '/login',
@@ -46,6 +63,21 @@ const routes = [
     component: SignupView,
   },
   {
+    path: '/admin',
+    name: 'admin',
+    component: AdminDashboard,
+  },
+  {
+    path: '/admin/orders',
+    name: 'adminOrders',
+    component: AdminOrdersView,
+  },
+  {
+    path: '/orders',
+    name: 'orders',
+    component: OrdersView,
+  },
+  {
     path: '/admin/products',
     name: 'adminProducts',
     component: AdminProductsView,
@@ -56,10 +88,20 @@ const routes = [
     component: AdminCategoriesView,
   },
   {
+    path: '/admin/customers',
+    name: 'adminCustomers',
+    component: AdminCustomerView,
+  },
+  {
     path: '/search',
     name: 'SearchRes',
     component: SearchRes,
   },
+  {
+    path: '/cart',
+    name: 'CartPage',
+    component: CartView,
+  }
 ]
 
 const router = createRouter({
