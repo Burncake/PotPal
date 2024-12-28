@@ -3,7 +3,15 @@ import { defineStore } from 'pinia'
 export const UserStore = defineStore('user', {
   state: () => ({
     token: localStorage.getItem('token') || null,
-    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
+    user: (() => {
+      try {
+        return localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
+      } catch (error) {
+        console.error("Invalid JSON in localStorage 'user':", error)
+        console.log(error)
+        return null // Fallback to null if parsing fails
+      }
+    })(),
     isLoggedIn: localStorage.getItem('token') !== null,
   }),
 
@@ -25,7 +33,9 @@ export const UserStore = defineStore('user', {
   getters: {
     getToken: (state) => state.token,
     getUser: (state) => state.user,
-    // isAuthenticated: (state) => !!state.token,
+    isAdmin(state) {
+      return state.user && state.user.priority === 1
+    },
   },
   strict: true,
 })

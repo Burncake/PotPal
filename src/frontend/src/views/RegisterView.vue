@@ -1,11 +1,11 @@
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
-import { useStore } from '@/store/Store'
+import { UserStore } from '@/store/User'
 
 export default {
   data() {
     return {
-      name: '',
+      fullname: '',
       username: '',
       email: '',
       dob: '',
@@ -13,11 +13,12 @@ export default {
       repassword: '',
       message: '',
 
-      store: useStore(),
+      store: UserStore(),
 
       data: {},
     }
   },
+
   methods: {
     checkRePassword() {
       console.log(this.password, this.repassword)
@@ -30,24 +31,27 @@ export default {
       }
       try {
         const response = await AuthenticationService.register({
-          Name: this.name,
-          Username: this.username,
-          Email: this.email,
-          DOB: this.dob,
-          Password: this.password,
-          Permission: 1,
+          fullName: this.fullname,
+          userName: this.username,
+          email: this.email,
+          dob: this.dob,
+          password: this.password,
+          // priority: 2,
+          // userType: 'Normal',
         })
         this.data = response.data
-        this.store.setToken(this.data.token)
-        this.store.setUser(this.data.user)
+        this.store.setToken(this.data.tokens)
+        this.store.setUser(this.data)
+
+        this.$router.push('/')
       } catch (error) {
         console.log('err', error)
         this.message = error.response.data.message
       }
     },
-    // reload(page) {
-    //   window.location.href = '/' + page
-    // },
+    reload(page) {
+      window.location.href = '/' + page
+    },
   },
 }
 </script>

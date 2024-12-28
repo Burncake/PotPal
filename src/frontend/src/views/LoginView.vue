@@ -1,6 +1,7 @@
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
-import { useStore } from '@/store/Store'
+import { UserStore } from '@/store/User'
+
 export default {
   data() {
     return {
@@ -9,19 +10,24 @@ export default {
       message: '',
       data: {},
 
-      store: useStore(),
+      store: UserStore(),
+      // callback: (response) => {
+      //   console.log('Handle the response', response)
+      // },
     }
   },
   methods: {
     async login() {
       try {
         const response = await AuthenticationService.login({
-          Username: this.username,
-          Password: this.password,
+          userName: this.username,
+          password: this.password,
         })
         this.data = response.data
-        this.store.setToken(this.data.token)
-        this.store.setUser(this.data.user)
+        this.store.setToken(this.data.tokens)
+        this.store.setUser(this.data)
+        console.log(this.data)
+        this.$router.push('/')
       } catch (error) {
         console.log('err', error)
         this.message = error.response.data.message

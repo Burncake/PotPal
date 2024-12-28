@@ -6,7 +6,7 @@ import ContactPage from '../views/ContactPage.vue'
 import ProductCategory from '../views/ProductCategory.vue'
 import SearchRes from '../views/SearchRes.vue'
 import LoginView from '../views/LoginView.vue'
-import SignupView from '../views/RegisterView.vue'
+import RegisterView from '../views/RegisterView.vue'
 import AdminProductsView from '@/views/AdminProductsView.vue'
 import AdminCategoriesView from '@/views/AdminCategoriesView.vue'
 import CartView from '@/views/CartView.vue'
@@ -16,6 +16,7 @@ import OrdersView from '@/views/OrdersView.vue'
 import OrderDetails from '@/views/OrderDetails.vue'
 import PaymentView from '@/views/PaymentView.vue'
 import AdminOrdersView from '@/views/AdminOrdersView.vue'
+import { UserStore } from '@/store/User'
 const routes = [
   {
     path: '/',
@@ -50,17 +51,19 @@ const routes = [
   {
     path: '/payment',
     name: 'payment',
-    component: PaymentView
+    component: PaymentView,
   },
   {
     path: '/login',
     name: 'login',
     component: LoginView,
+    meta: { requiresGuest: true },
   },
   {
     path: '/register',
     name: 'register',
-    component: SignupView,
+    component: RegisterView,
+    meta: { requiresGuest: true },
   },
   {
     path: '/admin',
@@ -99,14 +102,39 @@ const routes = [
   },
   {
     path: '/cart',
-    name: 'CartPage',
+    name: 'cart',
     component: CartView,
-  }
+    meta: { requiresAuth: true },
+  },
+  // {
+  //   path: '/user/profile',
+  //   name: 'profile',
+  //   component: ProfileView,
+  //   meta: { requiresAuth: true },
+  // },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  const uStore = UserStore()
+  if (uStore.isLoggedIn) {
+    if (to.name === 'login' || to.name === 'register') return next('/')
+
+    if (!uStore.isAdmin && to.name === 'admin') {
+      return next('/')
+    }
+    return next()
+  } else {
+    if (to.matched.some((record) => record.meta.requiresAuth)) {
+      next('/login')
+    } else {
+      next()
+    }
+  }
 })
 
 export default router
