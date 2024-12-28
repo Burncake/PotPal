@@ -58,9 +58,16 @@
           <router-link class="nav-link" to="/about">About Us</router-link>
           <router-link class="nav-link" to="/contact">Contact Us</router-link>
           <router-link class="nav-link" to="/cart">Cart</router-link>
-          <router-link class="nav-link" to="/orders">My Order</router-link> <!-- New Button -->
-          <router-link class="nav-link" to="/login">Login</router-link>
-          <router-link class="nav-link" to="/register">Register</router-link>
+          <router-link class="nav-link" to="/orders">My Order</router-link>
+          <!-- New Button -->
+          <template v-if="!this.userStore.isLoggedIn">
+            <router-link class="nav-link" to="/login">Login</router-link>
+            <router-link class="nav-link" to="/register">Register</router-link>
+          </template>
+          <template v-else>
+            <router-link class="nav-link" to="/profile">Profile</router-link>
+            <a class="nav-link" href="#" @click="logOut">Logout</a>
+          </template>
         </div>
       </div>
     </div>
@@ -68,6 +75,8 @@
 </template>
 
 <script>
+import { UserStore } from '@/store/User'
+
 export default {
   data() {
     return {
@@ -77,43 +86,53 @@ export default {
       errorMessage: '',
       products: [],
       searchQuery: '',
-    };
+
+      userStore: UserStore(),
+    }
   },
+
   mounted() {
-    this.fetchCategories();
-    this.fetchProduct();
+    this.fetchCategories()
+    this.fetchProduct()
   },
   methods: {
     fetchCategories() {
       fetch('https://6754193836bcd1eec85023b2.mockapi.io/api/category')
         .then((response) => response.json())
         .then((data) => {
-          this.categories = data;
+          this.categories = data
         })
         .catch((error) => {
-          this.error = true;
-          this.errorMessage = 'Error fetching categories';
-          this.loading = false;
-        });
+          this.error = true
+          this.errorMessage = 'Error fetching categories'
+          this.loading = false
+        })
     },
     fetchProduct() {
       fetch('https://6754193836bcd1eec85023b2.mockapi.io/api/products')
         .then((response) => response.json())
         .then((data) => {
-          this.products = data;
-          this.loading = false;
+          this.products = data
+          this.loading = false
         })
         .catch((error) => {
-          this.error = true;
-          this.errorMessage = 'Error fetching categories';
-          this.loading = false;
-        });
+          this.error = true
+          this.errorMessage = 'Error fetching categories'
+          this.loading = false
+        })
     },
     search() {
-      this.$router.replace({ path: 'search', query: { pattern: this.searchQuery } });
+      this.$router.replace({ path: 'search', query: { pattern: this.searchQuery } })
+    },
+    logOut() {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+
+      this.userStore.$reset()
+      this.$router.push('/')
     },
   },
-};
+}
 </script>
 
 <style scoped>
