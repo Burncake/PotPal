@@ -37,9 +37,7 @@ export default {
           fullName: this.fullname,
           email: this.email,
           address: this.address,
-          phoneNumber: this.phoneNumber,
-          role: "customer",
-          userStatus: "active",
+          phoneNumber: this.phoneNumber
         })
         this.data = response.data
         this.store.setToken(this.data.tokens)
