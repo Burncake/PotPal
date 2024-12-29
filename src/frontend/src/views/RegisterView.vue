@@ -5,12 +5,13 @@ import { UserStore } from '@/store/User'
 export default {
   data() {
     return {
-      fullname: '',
       username: '',
-      email: '',
-      dob: '',
       password: '',
       repassword: '',
+      fullname: '',
+      address: '',
+      phoneNumber: '',
+      email: '',
       message: '',
 
       store: UserStore(),
@@ -31,13 +32,14 @@ export default {
       }
       try {
         const response = await AuthenticationService.register({
-          fullName: this.fullname,
           userName: this.username,
-          email: this.email,
-          dob: this.dob,
           password: this.password,
-          // priority: 2,
-          // userType: 'Normal',
+          fullName: this.fullname,
+          email: this.email,
+          address: this.address,
+          phoneNumber: this.phoneNumber,
+          role: "customer",
+          userStatus: "active",
         })
         this.data = response.data
         this.store.setToken(this.data.tokens)
@@ -59,7 +61,7 @@ export default {
   <div class="col-6 col-md-4 col-xxl-2 mt-5 mx-auto">
     <form @submit.prevent="register">
       <div class="text-center mb-3">
-        <p>Sign up with:</p>
+        <p>Sign up with</p>
         <button
           type="button"
           data-mdb-button-init
@@ -97,11 +99,11 @@ export default {
         </button>
       </div>
 
-      <p class="text-center">or:</p>
+      <p class="text-center">or</p>
 
       <!-- Name input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <label class="form-label" for="registerName">Name</label>
+        <label class="form-label" for="registerName">Full Name</label>
         <input type="text" id="registerName" class="form-control" v-model="name" required />
       </div>
 
@@ -116,11 +118,19 @@ export default {
         <label class="form-label" for="registerEmail">Email</label>
         <input type="email" id="registerEmail" class="form-control" v-model="email" required />
       </div>
-      <!--DOB input -->
+
+      <!-- Address input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <label class="form-label" for="registerDob">Date of birth</label>
-        <input type="date" id="registerDob" class="form-control" v-model="dob" />
+        <label class="form-label" for="registerAddress">Address</label>
+        <input type="text" id="registerAddress" class="form-control" v-model="address" required />
       </div>
+
+      <!-- Phone Number input -->
+      <div data-mdb-input-init class="form-outline mb-4">
+        <label class="form-label" for="registerPhoneNumber">Phone Number</label>
+        <input type="text" id="registerPhoneNumber" class="form-control" v-model="phoneNumber" required />
+      </div>
+
       <!-- Password input -->
       <div data-mdb-input-init class="form-outline mb-4">
         <label class="form-label" for="registerPassword">Password</label>
@@ -135,7 +145,7 @@ export default {
 
       <!-- Repeat Password input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <label class="form-label" for="registerRepeatPassword">Repeat password</label>
+        <label class="form-label" for="registerRepeatPassword">Repeat Password</label>
         <input
           type="password"
           id="registerRepeatPassword"
@@ -174,7 +184,7 @@ export default {
       </div>
       <div class="text-center">
         <p>
-          Have an account?
+          Already have an account?
 
           <RouterLink class="dropdown-item" to="/login"><a href="">Log in</a></RouterLink>
         </p>
