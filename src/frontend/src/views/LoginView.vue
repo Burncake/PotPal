@@ -46,7 +46,7 @@ export default {
 
     <form method="post" @submit.prevent="login">
       <div class="text-center mb-3">
-        <p>Sign in with:</p>
+        <p>Sign in with</p>
         <button
           type="button"
           data-mdb-button-init
@@ -84,11 +84,11 @@ export default {
         </button>
       </div>
 
-      <p class="text-center">or:</p>
+      <p class="text-center">or</p>
 
       <!-- Email input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <label class="form-label" for="loginName">Email or username</label>
+        <label class="form-label" for="loginName">Email or Username</label>
         <input
           type="text"
           id="loginName"
@@ -112,20 +112,8 @@ export default {
         />
       </div>
 
-      <!-- 2 column grid layout -->
-      <div class="row mb-4">
-        <div class="col-md-6 d-flex justify-content-center">
-          <!-- Checkbox -->
-          <div class="form-check mb-3 mb-md-0">
-            <input class="form-check-input" type="checkbox" value="" id="loginCheck" checked />
-            <label class="form-check-label" for="loginCheck"> Remember me </label>
-          </div>
-        </div>
-
-        <div class="col-md-6 d-flex justify-content-center">
-          <!-- Simple link -->
-          <a href="#!">Forgot password?</a>
-        </div>
+      <div class="d-flex">
+        <a href="#!">Forgot password?</a>
       </div>
 
       <div class="form-check d-flex justify-content-center">
