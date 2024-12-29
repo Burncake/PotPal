@@ -79,6 +79,7 @@ const routes = [
     path: '/orders',
     name: 'orders',
     component: OrdersView,
+    meta: { requiresAuth: true },
   },
   {
     path: '/admin/products',
