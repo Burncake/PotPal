@@ -23,7 +23,7 @@ export default {
           userName: this.username,
           password: this.password,
         })
-        this.data = response.data
+        this.data = response.data[0]
         this.store.setToken(this.data.tokens)
         this.store.setUser(this.data)
         console.log(this.data)
@@ -88,7 +88,7 @@ export default {
 
       <!-- Email input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <label class="form-label" for="loginName">Email or Username</label>
+        <label class="form-label" for="loginName">Username</label>
         <input
           type="text"
           id="loginName"
