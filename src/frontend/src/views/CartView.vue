@@ -68,10 +68,12 @@
 
 
 <script>
+import { UserStore } from '@/store/User';
+  
 export default {
   data() {
     return {
-      customerID: '00001', // Example customer ID
+      customerID: UserStore().user.userID, // Logged in userID
       customerName: '', // To store the fullName of the customer
       cartData: [], // Cart data from API
       productData: [], // Product data from API
