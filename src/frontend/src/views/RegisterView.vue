@@ -1,8 +1,8 @@
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
 import { UserStore } from '@/store/User'
-import CartSevice from '@/services/CartService'
-  
+import Api from '@/services/Api'
+
 export default {
   data() {
     return {
@@ -43,7 +43,13 @@ export default {
         this.data = response.data
         this.store.setToken(this.data.tokens)
         this.store.setUser(this.data)
-        CartSevice.createCart(this.data.userID)
+        // Create cart for new user
+        const cart = {
+          customerID: this.data.userID,
+          createAt: new Date().toISOString(),
+          cartsDetail: [],
+        }
+        await Api().post('/carts', cart)
         
         this.$router.push('/')
       } catch (error) {
