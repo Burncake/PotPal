@@ -1,6 +1,17 @@
 import Api from './Api'
 
 export default {
+  async createCart(customerID) {
+    const cart = {
+      cartID: customerID,
+      customerID: customerID,
+      createAt: new Date().toISOString(),
+      cartsDetail: [],
+    }
+
+    return await Api().post('/carts', cart)
+  },
+  
   // Fetch the cart for a specific customer
   async getCart(customerID) {
     return await Api().get(`/carts?customerID=${customerID}`)
