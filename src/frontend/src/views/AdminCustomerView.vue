@@ -1,159 +1,214 @@
 <template>
   <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <div class="admin-nav-container">
-        <router-link
-          v-for="item in navigationItems"
-          :key="item.name"
-          :to="item.href"
-          class="admin-nav-item"
-          :class="{ 'admin-nav-item-active': currentSection === item.name }"
-          @click.prevent="currentSection = item.name"
-        >
-          <component :is="item.icon" class="admin-nav-icon" />
-          <span>{{ item.name }}</span>
-        </router-link>
-      </div>
-    </aside>
+    <!-- Admin Sidebar -->
+    <AdminSidebar />
 
-    <main class="admin-content">
-      <h1>Customer Information</h1>
-      <div v-if="loading" class="loading">Loading...</div>
-      <div v-else>
-        <div v-for="user in users" :key="user.userID" class="user-card">
-          <img :src="user.avatar" alt="Avatar" class="user-avatar" />
-          <div class="user-info">
-            <p><strong>User ID:</strong> {{ user.userID }}</p>
-            <p><strong>Full Name:</strong> {{ user.fullName }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Address:</strong> {{ user.address }}</p>
-            <p><strong>Phone:</strong> {{ user.phoneNumber }}</p>
-            <p><strong>Role:</strong> {{ user.role }}</p>
-            <p><strong>Status:</strong> {{ user.userStatus }}</p>
-            <p><strong>Tokens:</strong> {{ user.tokens }}</p>
-          </div>
+    <!-- Main Content -->
+    <div class="admin-content">
+      <main class="admin-main">
+        <div class="admin-header">
+          <h2 class="admin-page-title">Customers</h2>
+          <button 
+            @click="openModal('add')"
+            class="admin-button"
+          >
+            <PlusIcon class="admin-button-icon" />
+            Add Customer
+          </button>
         </div>
+
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th class="admin-th w-[40%]">Customer</th>
+                <th class="admin-th w-[20%]">Email</th>
+                <th class="admin-th w-[15%]">Role</th>
+                <th class="admin-th w-[15%]">Status</th>
+                <th class="admin-th w-[10%] text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in users" :key="user.userID" class="admin-tr">
+                <td class="admin-td">
+                  <div class="admin-product-cell">
+                    <img :src="user.avatar" alt="" class="admin-product-image">
+                    <div>
+                      <div class="admin-product-name">{{ user.fullName }}</div>
+                      <div class="admin-product-id">ID: {{ user.userID }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="admin-td">{{ user.email }}</td>
+                <td class="admin-td">{{ user.role }}</td>
+                <td class="admin-td">
+                  <span :class="getStatusClass(user.userStatus)">
+                    {{ user.userStatus }}
+                  </span>
+                </td>
+                <td class="admin-td text-right">
+                  <button @click="openModal('edit', user)" class="admin-action-button text-blue-600">
+                    <EditIcon class="admin-action-icon" />
+                  </button>
+                  <button @click="deleteCustomer(user.userID)" class="admin-action-button text-red-600">
+                    <TrashIcon class="admin-action-icon" />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal -->
+    <div v-if="showModal" class="admin-modal-overlay">
+      <div class="admin-modal">
+        <h2 class="admin-modal-title">{{ modalMode === 'add' ? 'Add New Customer' : 'Edit Customer' }}</h2>
+        <form @submit.prevent="submitForm" class="admin-form">
+          <div class="admin-form-group">
+            <label for="fullName" class="admin-label">Full Name</label>
+            <input v-model="currentUser.fullName" id="fullName" type="text" required class="admin-input">
+          </div>
+          <div class="admin-form-group">
+            <label for="email" class="admin-label">Email</label>
+            <input v-model="currentUser.email" id="email" type="email" required class="admin-input">
+          </div>
+          <div class="admin-form-row">
+            <div class="admin-form-group">
+              <label for="role" class="admin-label">Role</label>
+              <select v-model="currentUser.role" id="role" class="admin-input" required>
+                <option value="Customer">Customer</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+            <div class="admin-form-group">
+              <label for="userStatus" class="admin-label">Status</label>
+              <select v-model="currentUser.userStatus" id="userStatus" class="admin-input" required>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div class="admin-form-group">
+            <label for="address" class="admin-label">Address</label>
+            <textarea v-model="currentUser.address" id="address" rows="3" class="admin-textarea"></textarea>
+          </div>
+          <div class="admin-form-group">
+            <label for="phoneNumber" class="admin-label">Phone Number</label>
+            <input v-model="currentUser.phoneNumber" id="phoneNumber" type="tel" class="admin-input">
+          </div>
+          <div class="admin-form-group">
+            <label for="avatar" class="admin-label">Avatar URL</label>
+            <input v-model="currentUser.avatar" id="avatar" type="url" class="admin-input" placeholder="https://example.com/avatar.jpg">
+          </div>
+          <div class="admin-modal-footer">
+            <button type="button" @click="closeModal" class="admin-button-secondary">
+              Cancel
+            </button>
+            <button type="submit" class="admin-button-primary">
+              {{ modalMode === 'add' ? 'Add Customer' : 'Update Customer' }}
+            </button>
+          </div>
+        </form>
       </div>
-    </main>
+    </div>
   </div>
 </template>
 
-<script>
-import { ref } from 'vue';
-import { HomeIcon, BoxIcon, FolderIcon, ShoppingCartIcon, UsersIcon, BarChartIcon, SettingsIcon } from 'lucide-vue-next';
+<script setup>
+import '@/assets/styles/admin-layout.css'
+import AdminSidebar from '@/components/AdminSidebar.vue'
+import { ref, onMounted } from 'vue'
+import { PlusIcon, EditIcon, TrashIcon } from 'lucide-vue-next'
 
-export default {
-  data() {
-    return {
-      users: [],
-      loading: true,
-      currentSection: 'Customers',
-      navigationItems: [
-        { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-        { name: 'Products', href: '/admin/products', icon: BoxIcon },
-        { name: 'Categories', href: '/admin/categories', icon: FolderIcon },
-        { name: 'Orders', href: '/admin/orders', icon: ShoppingCartIcon },
-        { name: 'Customers', href: '/admin/customers', icon: UsersIcon },
-        { name: 'Analytics', href: '/admin/analytics', icon: BarChartIcon },
-        { name: 'Settings', href: '/admin/settings', icon: SettingsIcon },
-      ],
-    };
-  },
-  mounted() {
-    this.fetchUserData();
-  },
-  methods: {
-    async fetchUserData() {
-      try {
-        const response = await fetch('https://67628fc046efb373237507fb.mockapi.io/user');
-        const data = await response.json();
-        this.users = data;
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        this.loading = false;
-      }
-    },
-  },
+const users = ref([])
+const showModal = ref(false)
+const modalMode = ref('add')
+const currentUser = ref({})
+
+const apiUrl = 'https://67628fc046efb373237507fb.mockapi.io/user'
+
+onMounted(async () => {
+  await fetchUsers()
+})
+
+const fetchUsers = async () => {
+  try {
+    const response = await fetch(apiUrl)
+    if (!response.ok) throw new Error('Network response was not ok')
+    users.value = await response.json()
+  } catch (error) {
+    console.error('Error fetching users:', error)
+  }
+}
+
+const getStatusClass = (status) => {
+  const baseClasses = 'admin-status-badge'
+  switch (status) {
+    case 'Active':
+      return `${baseClasses} admin-status-available`
+    case 'Inactive':
+      return `${baseClasses} admin-status-outofstock`
+    default:
+      return `${baseClasses} admin-status-default`
+  }
+}
+
+const openModal = (mode, user = {}) => {
+  modalMode.value = mode;
+  currentUser.value = mode === 'edit' ? { ...user } : {
+    fullName: '',
+    email: '',
+    role: 'Customer',
+    userStatus: 'Active',
+    address: '',
+    phoneNumber: '',
+    avatar: '',
+  };
+  showModal.value = true;
 };
+
+const closeModal = () => {
+  showModal.value = false
+  currentUser.value = {}
+}
+
+const submitForm = async () => {
+  try {
+    const method = modalMode.value === 'add' ? 'POST' : 'PUT'
+    const url = modalMode.value === 'add' ? apiUrl : `${apiUrl}/${currentUser.value.userID}`
+    
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(currentUser.value),
+    })
+
+    if (!response.ok) throw new Error('Network response was not ok')
+    
+    await fetchUsers()
+    closeModal()
+  } catch (error) {
+    console.error('Error submitting form:', error)
+  }
+}
+
+const deleteCustomer = async (userID) => {
+  if (confirm('Are you sure you want to delete this customer?')) {
+    try {
+      const response = await fetch(`${apiUrl}/${userID}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Network response was not ok')
+      
+      await fetchUsers()
+    } catch (error) {
+      console.error('Error deleting customer:', error)
+    }
+  }
+}
 </script>
-
-<style scoped>
-.admin-layout {
-  display: flex;
-}
-
-.admin-sidebar {
-  width: 250px;
-  background: white;
-  border-right: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.admin-nav-container {
-  padding: 1rem 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.admin-nav-item {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  color: #4b5563;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.admin-nav-item:hover {
-  background-color: #f3f4f6;
-}
-
-.admin-nav-item-active {
-  background-color: #f3f4f6;
-  color: #2563eb;
-}
-
-.admin-nav-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-right: 0.75rem;
-}
-
-.admin-content {
-  flex-grow: 1;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-}
-
-.loading {
-  font-size: 18px;
-  color: #666;
-}
-
-.user-card {
-  display: flex;
-  margin: 10px 0;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.user-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  margin-right: 20px;
-}
-
-.user-info p {
-  margin: 5px 0;
-}
-
-.user-info strong {
-  font-weight: bold;
-}
-</style>
