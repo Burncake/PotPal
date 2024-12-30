@@ -25,12 +25,6 @@
       >
         <datalist id="laptopOptions">
           <option v-for="prod in products" :value="prod.prodName" :key="prod.prodID"></option>
-
-          <!-- <option value="San Francisco"></option>
-          <option value="New York"></option>
-          <option value="Seattle"></option>
-          <option value="Los Angeles"></option>
-          <option value="Chicago"></option> -->
         </datalist>
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -49,7 +43,6 @@
               Categories
             </a>
             <ul class="dropdown-menu" id="categoryDropdown">
-              <!-- Display loading message or error if needed -->
               <li v-if="loading">Loading categories...</li>
               <li v-if="error">{{ errorMessage }}</li>
               <li v-for="(category, index) in categories" :key="index">
@@ -65,8 +58,16 @@
           <router-link class="nav-link" to="/about">About Us</router-link>
           <router-link class="nav-link" to="/contact">Contact Us</router-link>
           <router-link class="nav-link" to="/cart">Cart</router-link>
-          <router-link class="nav-link" to="/login">Login</router-link>
-          <router-link class="nav-link" to="/register">Register</router-link>
+          <router-link class="nav-link" to="/orders">My Order</router-link>
+          <!-- New Button -->
+          <template v-if="!this.userStore.isLoggedIn">
+            <router-link class="nav-link" to="/login">Login</router-link>
+            <router-link class="nav-link" to="/register">Register</router-link>
+          </template>
+          <template v-else>
+            <router-link class="nav-link" to="/profile">Profile</router-link>
+            <a class="nav-link" href="#" @click="logOut">Logout</a>
+          </template>
         </div>
       </div>
     </div>
@@ -74,6 +75,8 @@
 </template>
 
 <script>
+import { UserStore } from '@/store/User'
+
 export default {
   data() {
     return {
@@ -83,12 +86,14 @@ export default {
       errorMessage: '',
       products: [],
       searchQuery: '',
+
+      userStore: UserStore(),
     }
   },
+
   mounted() {
     this.fetchCategories()
     this.fetchProduct()
-    // console.log(this.products)
   },
   methods: {
     fetchCategories() {
@@ -103,7 +108,6 @@ export default {
           this.loading = false
         })
     },
-
     fetchProduct() {
       fetch('https://6754193836bcd1eec85023b2.mockapi.io/api/products')
         .then((response) => response.json())
@@ -119,6 +123,13 @@ export default {
     },
     search() {
       this.$router.replace({ path: 'search', query: { pattern: this.searchQuery } })
+    },
+    logOut() {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+
+      this.userStore.$reset()
+      this.$router.push('/')
     },
   },
 }

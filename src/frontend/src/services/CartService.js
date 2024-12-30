@@ -1,13 +1,25 @@
 import Api from './Api'
 
 export default {
-  async getCart(credentials) {
-    return await Api().get(`/cart`, credentials)
+  // Fetch the cart for a specific customer
+  async getCart(customerID) {
+    return await Api().get(`/carts?customerID=${customerID}`)
   },
 
-  async postCart(credentials, headers) {
-    return await Api().post('/cart', credentials, {
-      headers: headers, // Use the provided header object
-    })
+  // Add or update the cart for a specific customer
+  async postCart(customerID, cartDetails, headers) {
+    const cart = {
+      customerID: customerID,
+      createAt: new Date().toISOString(),
+      cartsDetail: cartDetails,
+    }
+    
+    // Check if the cart exists, and if not, create it
+    return await Api().post('/carts', cart, { headers: headers })
   },
+
+  // Update an existing cart
+  async updateCart(cartID, cartDetails, headers) {
+    return await Api().put(`/carts/${cartID}`, { cartsDetail: cartDetails }, { headers: headers })
+  }
 }

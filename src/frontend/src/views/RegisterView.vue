@@ -1,23 +1,26 @@
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
-import { useStore } from '@/store/Store'
+import { UserStore } from '@/store/User'
+import Api from '@/services/Api'
 
 export default {
   data() {
     return {
-      name: '',
       username: '',
-      email: '',
-      dob: '',
       password: '',
       repassword: '',
+      fullname: '',
+      address: '',
+      phoneNumber: '',
+      email: '',
       message: '',
 
-      store: useStore(),
+      store: UserStore(),
 
       data: {},
     }
   },
+
   methods: {
     checkRePassword() {
       console.log(this.password, this.repassword)
@@ -30,24 +33,33 @@ export default {
       }
       try {
         const response = await AuthenticationService.register({
-          Name: this.name,
-          Username: this.username,
-          Email: this.email,
-          DOB: this.dob,
-          Password: this.password,
-          Permission: 1,
+          userName: this.username,
+          password: this.password,
+          fullName: this.fullname,
+          email: this.email,
+          address: this.address,
+          phoneNumber: this.phoneNumber
         })
         this.data = response.data
-        this.store.setToken(this.data.token)
-        this.store.setUser(this.data.user)
+        this.store.setToken(this.data.tokens)
+        this.store.setUser(this.data)
+        // Create cart for new user
+        const cart = {
+          customerID: this.data.userID,
+          createAt: new Date().toISOString(),
+          cartsDetail: [],
+        }
+        await Api().post('/carts', cart)
+        
+        this.$router.push('/')
       } catch (error) {
         console.log('err', error)
         this.message = error.response.data.message
       }
     },
-    // reload(page) {
-    //   window.location.href = '/' + page
-    // },
+    reload(page) {
+      window.location.href = '/' + page
+    },
   },
 }
 </script>
@@ -55,7 +67,7 @@ export default {
   <div class="col-6 col-md-4 col-xxl-2 mt-5 mx-auto">
     <form @submit.prevent="register">
       <div class="text-center mb-3">
-        <p>Sign up with:</p>
+        <p>Sign up with</p>
         <button
           type="button"
           data-mdb-button-init
@@ -93,12 +105,12 @@ export default {
         </button>
       </div>
 
-      <p class="text-center">or:</p>
+      <p class="text-center">or</p>
 
       <!-- Name input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <label class="form-label" for="registerName">Name</label>
-        <input type="text" id="registerName" class="form-control" v-model="name" required />
+        <label class="form-label" for="registerName">Full Name</label>
+        <input type="text" id="registerName" class="form-control" v-model="fullname" required />
       </div>
 
       <!-- Username input -->
@@ -112,11 +124,19 @@ export default {
         <label class="form-label" for="registerEmail">Email</label>
         <input type="email" id="registerEmail" class="form-control" v-model="email" required />
       </div>
-      <!--DOB input -->
+
+      <!-- Address input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <label class="form-label" for="registerDob">Date of birth</label>
-        <input type="date" id="registerDob" class="form-control" v-model="dob" />
+        <label class="form-label" for="registerAddress">Address</label>
+        <input type="text" id="registerAddress" class="form-control" v-model="address" required />
       </div>
+
+      <!-- Phone Number input -->
+      <div data-mdb-input-init class="form-outline mb-4">
+        <label class="form-label" for="registerPhoneNumber">Phone Number</label>
+        <input type="text" id="registerPhoneNumber" class="form-control" v-model="phoneNumber" required />
+      </div>
+
       <!-- Password input -->
       <div data-mdb-input-init class="form-outline mb-4">
         <label class="form-label" for="registerPassword">Password</label>
@@ -131,7 +151,7 @@ export default {
 
       <!-- Repeat Password input -->
       <div data-mdb-input-init class="form-outline mb-4">
-        <label class="form-label" for="registerRepeatPassword">Repeat password</label>
+        <label class="form-label" for="registerRepeatPassword">Repeat Password</label>
         <input
           type="password"
           id="registerRepeatPassword"
@@ -170,7 +190,7 @@ export default {
       </div>
       <div class="text-center">
         <p>
-          Have an account?
+          Already have an account?
 
           <RouterLink class="dropdown-item" to="/login"><a href="">Log in</a></RouterLink>
         </p>
