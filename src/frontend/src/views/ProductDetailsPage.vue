@@ -12,7 +12,6 @@
             <p class="text-capitalize"><strong>Category:</strong> {{ product.catID }}</p>
             <p><strong>Description:</strong> {{ product.description }}</p>
             <div class="mt-4">
-              <button class="btn btn-primary me-2">Buy Now</button>
               <AddToCart :product="product" />
             </div>
           </div>
