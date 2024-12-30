@@ -46,6 +46,8 @@
 </template>
 
 <script>
+import { UserStore } from '@/store/User';
+  
 export default {
   data() {
     return {
@@ -53,7 +55,7 @@ export default {
       loading: false,
       error: false,
       errorMessage: "",
-      userID: "00001", // Specify the user ID
+      userID: UserStore().user.userID,
     };
   },
   mounted() {
