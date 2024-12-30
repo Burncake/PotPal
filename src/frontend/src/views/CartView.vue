@@ -68,7 +68,7 @@
 
 
 <script>
-import { UserStore } from '@/store/User';
+import { UserStore } from '@/store/User'
   
 export default {
   data() {
