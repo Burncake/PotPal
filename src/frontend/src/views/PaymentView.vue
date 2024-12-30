@@ -77,10 +77,12 @@
   </template>
   
   <script>
+  import { UserStore } from '@/store/User'
+    
   export default {
     data() {
       return {
-        customerID: '00001',
+        customerID: UserStore().user.userID,
         customerName: '',
         customerAddress: '',
         customerPhoneNumber: '',
