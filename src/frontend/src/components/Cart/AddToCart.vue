@@ -1,6 +1,7 @@
 <script>
 import { CartStore } from '../../store/Cart'
 import { useToast } from 'vue-toastification'
+import { UserStore } from '@/store/User'
 import axios from 'axios'
 
 export default {
@@ -34,7 +35,7 @@ export default {
     }
 
     const addToCart = async () => {
-      const customerID = '00001' // Set the customer ID dynamically if needed
+      const customerID = UserStore().user.userID
       const quant = 1
 
       // Get the customer's cart
