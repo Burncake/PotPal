@@ -1,7 +1,8 @@
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
 import { UserStore } from '@/store/User'
-
+import CartSevice from '@/services/CartService'
+  
 export default {
   data() {
     return {
@@ -42,7 +43,8 @@ export default {
         this.data = response.data
         this.store.setToken(this.data.tokens)
         this.store.setUser(this.data)
-
+        CartSevice.createCart(this.data.userID)
+        
         this.$router.push('/')
       } catch (error) {
         console.log('err', error)
@@ -102,7 +104,7 @@ export default {
       <!-- Name input -->
       <div data-mdb-input-init class="form-outline mb-4">
         <label class="form-label" for="registerName">Full Name</label>
-        <input type="text" id="registerName" class="form-control" v-model="name" required />
+        <input type="text" id="registerName" class="form-control" v-model="fullname" required />
       </div>
 
       <!-- Username input -->
