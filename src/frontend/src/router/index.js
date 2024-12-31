@@ -16,6 +16,7 @@ import OrdersView from '@/views/OrdersView.vue'
 import OrderDetails from '@/views/OrderDetails.vue'
 import PaymentView from '@/views/PaymentView.vue'
 import AdminOrdersView from '@/views/AdminOrdersView.vue'
+import ProfileView from '@/views/ProfileView.vue'
 import { UserStore } from '@/store/User'
 const routes = [
   {
@@ -107,12 +108,12 @@ const routes = [
     component: CartView,
     meta: { requiresAuth: true },
   },
-  // {
-  //   path: '/user/profile',
-  //   name: 'profile',
-  //   component: ProfileView,
-  //   meta: { requiresAuth: true },
-  // },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: ProfileView,
+    meta: { requiresAuth: true },
+  },
 ]
 
 const router = createRouter({
