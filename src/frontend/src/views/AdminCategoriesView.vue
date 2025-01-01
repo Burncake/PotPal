@@ -8,7 +8,7 @@
       <main class="admin-main">
         <div class="admin-header">
           <h2 class="admin-page-title">Categories</h2>
-          <button 
+          <button
             @click="openModal('add')"
             class="admin-button"
           >
@@ -71,8 +71,8 @@
             <label for="parentID" class="admin-label">Parent Category</label>
             <select v-model="currentCategory.parentID" id="parentID" class="admin-input">
               <option value="">None</option>
-              <option v-for="cat in categories" 
-                      :key="cat.catID" 
+              <option v-for="cat in categories"
+                      :key="cat.catID"
                       :value="cat.catID"
                       :disabled="cat.catID === currentCategory.catID">
                 {{ cat.catName }}
@@ -145,7 +145,7 @@ const submitForm = async () => {
   try {
     const method = modalMode.value === 'add' ? 'POST' : 'PUT'
     const url = modalMode.value === 'add' ? apiUrl : `${apiUrl}/${currentCategory.value.catID}`
-    
+
     const response = await fetch(url, {
       method: method,
       headers: {
@@ -155,7 +155,7 @@ const submitForm = async () => {
     })
 
     if (!response.ok) throw new Error('Network response was not ok')
-    
+
     await fetchCategories()
     closeModal()
   } catch (error) {
@@ -171,7 +171,7 @@ const deleteCategory = async (catID) => {
       })
 
       if (!response.ok) throw new Error('Network response was not ok')
-      
+
       await fetchCategories()
     } catch (error) {
       console.error('Error deleting category:', error)

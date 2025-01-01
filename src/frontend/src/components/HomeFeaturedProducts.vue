@@ -22,23 +22,33 @@
 
 <script>
 export default {
-    data() {
-        return {
-            featuredProducts: []
-        };
-    },
-    mounted() {
-    fetch("https://6754193836bcd1eec85023b2.mockapi.io/api/products")
-        .then(response => response.json())
-        .then(data => {
-            this.featuredProducts = data.slice(0, 4);
-        })
-        .catch(error => {
-            console.error("Error fetching featured products:", error);
-        });
-    }
-}
+  data() {
+    return {
+      featuredProducts: []
+    };
+  },
+  mounted() {
+    fetch("http://localhost:3000/product/general/all")
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(result => {
+        if (result.status === "success" && result.data) {
+          this.featuredProducts = result.data.slice(0, 4);
+        } else {
+          console.error("Unexpected API response:", result);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching featured products:", error);
+      });
+  }
+};
 </script>
+
 
 <style scoped>
 a {

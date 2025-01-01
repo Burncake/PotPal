@@ -112,10 +112,11 @@ export default {
     async fetchProducts() {
       try {
         const productsResponse = await fetch(
-          `https://6754193836bcd1eec85023b2.mockapi.io/api/products`
+          'http://localhost:3000/product/general/all'
         );
         const productsData = await productsResponse.json();
-        this.products = productsData;
+        // Extract the actual product data from the API response
+        this.products = productsData.data;
       } catch (error) {
         console.error('Error fetching products:', error);
       }

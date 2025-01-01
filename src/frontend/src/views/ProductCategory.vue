@@ -10,7 +10,9 @@
               <img :src="product.mainImage" alt="Product Image">
             </div>
             <div class="card-body align-self-bottom">
-              <h6 class="card-title"><router-link :to="'/product/' + product.prodID">{{ product.prodName }}</router-link></h6>
+              <h6 class="card-title">
+                <router-link :to="'/product/' + product.prodID">{{ product.prodName }}</router-link>
+              </h6>
               <p class="card-text p-0 mb-0 mt-3"><strong>Price: ${{ product.price }}</strong></p>
             </div>
           </div>
@@ -19,12 +21,12 @@
     </div>
   </div>
 </template>
-  
+
 <script>
 export default {
   data() {
     return {
-      category: {}, 
+      category: {},
       products: []
     };
   },
@@ -35,21 +37,22 @@ export default {
   watch: {
     '$route.params.catID': 'fetchCategoryAndProducts'
   },
-  mounted() {
-    this.fetchCategoryAndProducts();
-  },
   methods: {
     async fetchCategoryAndProducts() {
       try {
         const categoryId = this.$route.params.catID;
-        
-        const categoryResponse = await fetch(`https://6754193836bcd1eec85023b2.mockapi.io/api/category/${categoryId}`);
-        const categoryData = await categoryResponse.json();
-        this.category = categoryData;
 
-        const productsResponse = await fetch(`https://6754193836bcd1eec85023b2.mockapi.io/api/products?catID=${categoryId}`);
-        const productsData = await productsResponse.json();
-        this.products = productsData;
+        // Fetch the category details
+        const categoryResponse = await fetch(`http://localhost:3000/product/category/${categoryId}`);
+        const categoryData = await categoryResponse.json();
+
+        if (categoryData.status === "success") {
+          this.category = { catName: categoryData.data.catName };  // Set the category name correctly
+          this.products = categoryData.data.products;  // Use the 'products' array correctly
+        } else {
+          console.error('Category not found');
+          return;
+        }
       } catch (error) {
         console.error('Error fetching category or products:', error);
       }
@@ -57,7 +60,7 @@ export default {
   }
 };
 </script>
-  
+
 <style scoped>
 .product-category-container {
   background-color: #f8f9fa;
@@ -114,7 +117,6 @@ a:hover {
   bottom: 0;
 }
 
-
 img {
   width: 200px;
   height: 200px;
@@ -126,4 +128,3 @@ img {
   color: #FFD700;
 }
 </style>
-  

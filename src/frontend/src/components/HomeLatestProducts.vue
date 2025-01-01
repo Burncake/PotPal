@@ -26,36 +26,33 @@
 
 <script>
 export default {
-    data() {
-        return {
-            lastestProducts: []
-        };
-    },
-    mounted() {
-        fetch("https://6754193836bcd1eec85023b2.mockapi.io/api/products")
-            .then(response => response.json())
-            .then(data => {
-                this.lastestProducts = data;
-            })
-            .catch(error => {
-                console.error("Error fetching featured products:", error);
-            });
-    },
-    /*
-    methods: {
-        generateStarRating(rating) {
-            const roundedRating = Math.round(rating * 2) / 2;
-            const fullStars = Math.floor(roundedRating);
-            const halfStar = roundedRating % 1 === 0.5;
-            const stars = '⭐'.repeat(fullStars);
-            const halfStarSymbol = halfStar ? '⭐' : '';
-            
-            return `${stars}${halfStarSymbol}`;
+  data() {
+    return {
+      lastestProducts: []
+    };
+  },
+  mounted() {
+    fetch("http://localhost:3000/product/general/all")
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-    }
-    */
-}
+        return response.json();
+      })
+      .then(result => {
+        if (result.status === "success" && result.data) {
+          this.lastestProducts = result.data;
+        } else {
+          console.error("Unexpected API response:", result);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching latest products:", error);
+      });
+  }
+};
 </script>
+
 
 <style scoped>
 a {

@@ -78,9 +78,9 @@
               class="rounded-circle"
               height="25"
               alt="Black and White Portrait of a Man"
-              loading="lazy"
             />
           </a>
+          loading="lazy"
           <slot name="profiledrop"></slot>
           <!-- <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
             <li>
@@ -101,3 +101,5 @@
   </nav>
   <!-- Navbar -->
 </template>
+<script setup lang="ts">
+</script>

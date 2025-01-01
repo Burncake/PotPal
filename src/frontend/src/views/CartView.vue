@@ -3,7 +3,7 @@
     <div class="cart-header">
       <h1 class="cart-title">{{ customerName }}'s Cart</h1>
     </div>
-    
+
     <div v-if="hasItems" class="cart-content">
       <div class="cart-items">
         <div v-for="cart in cartDetails" :key="cart.cartID">
@@ -16,26 +16,26 @@
               <div class="product-image-container">
                 <img :src="getProductImage(item.prodID)" :alt="getProductName(item.prodID)" class="product-image" />
               </div>
-              
+
               <div class="product-info">
                 <h3 class="product-name">{{ getProductName(item.prodID) }}</h3>
                 <p class="product-description">{{ getProductDescription(item.prodID) }}</p>
-                
+
                 <div class="product-details">
                   <div class="price-quantity">
                     <p class="price">{{ getProductPrice(item.prodID) | currency }}</p>
-                    
+
                     <div class="quantity-controls">
-                      <button 
-                        @click="decreaseQuantity(cart.cartID, item.prodID)" 
+                      <button
+                        @click="decreaseQuantity(cart.cartID, item.prodID)"
                         :disabled="item.quantity <= 1"
                         class="quantity-btn"
                       >
                         −
                       </button>
                       <span class="quantity">{{ item.quantity }}</span>
-                      <button 
-                        @click="increaseQuantity(cart.cartID, item.prodID)" 
+                      <button
+                        @click="increaseQuantity(cart.cartID, item.prodID)"
                         :disabled="item.quantity >= getProductStock(item.prodID)"
                         class="quantity-btn"
                       >
@@ -43,11 +43,11 @@
                       </button>
                     </div>
                   </div>
-                  
+
                   <div class="actions">
                     <p class="total">Total: {{ getProductPrice(item.prodID) * item.quantity | currency }}</p>
-                    <button 
-                      @click="removeProductFromCart(cart.cartID, item.prodID)" 
+                    <button
+                      @click="removeProductFromCart(cart.cartID, item.prodID)"
                       class="remove-button"
                     >
                       <i class="fa fa-trash"></i>
@@ -60,7 +60,7 @@
           </template>
         </div>
       </div>
-      
+
       <div class="cart-summary">
         <div class="summary-content">
           <h2>Order Summary</h2>
@@ -78,9 +78,9 @@
               <span>{{ calculateTotalAmount(cartDetails) | currency }}</span>
             </div>
           </div>
-          <button 
+          <button
             v-if="cartDetails.some(cart => cart.cartsDetail.length > 0)"
-            @click="goToPaymentPage" 
+            @click="goToPaymentPage"
             class="checkout-button"
           >
             Proceed to Checkout
@@ -88,7 +88,7 @@
         </div>
       </div>
     </div>
-    
+
     <div v-else class="empty-state">
       <i class="fa fa-shopping-cart"></i>
       <h2>Your cart is empty</h2>
@@ -110,123 +110,7 @@ export default {
       productData: [],
       userData: [],
     };
-  },
-  computed: {
-    cartDetails() {
-      return this.cartData.filter(cart => cart.customerID === this.customerID);
-    },
-    hasItems() {
-      return this.cartDetails.some(cart => cart.cartsDetail && cart.cartsDetail.length > 0);
-    }
-  },
-  methods: {
-    async fetchCartData() {
-      const cartResponse = await fetch('https://67628fc046efb373237507fb.mockapi.io/carts');
-      this.cartData = await cartResponse.json();
-    },
-    async fetchProductData() {
-      const productResponse = await fetch('https://6754193836bcd1eec85023b2.mockapi.io/api/products');
-      this.productData = await productResponse.json();
-    },
-    async fetchUserData() {
-      const userResponse = await fetch('https://67628fc046efb373237507fb.mockapi.io/user');
-      this.userData = await userResponse.json();
-      const user = this.userData.find(user => user.userID === this.customerID);
-      this.customerName = user ? user.fullName : 'Unknown Customer';
-    },
-    getProductName(prodID) {
-      const product = this.productData.find(product => product.prodID === prodID);
-      return product ? product.prodName : 'Product name not found';
-    },
-    getProductDescription(prodID) {
-      const product = this.productData.find(product => product.prodID === prodID);
-      return product ? product.description : 'No description available';
-    },
-    getProductPrice(prodID) {
-      const product = this.productData.find(product => product.prodID === prodID);
-      return product ? product.price : 0;
-    },
-    getProductImage(prodID) {
-      const product = this.productData.find(product => product.prodID === prodID);
-      return product ? product.mainImage : '';
-    },
-    getProductStock(prodID) {
-      const product = this.productData.find(product => product.prodID === prodID);
-      return product ? product.stock : 0;
-    },
-    calculateTotalAmount(cartDetails) {
-      return cartDetails.reduce((total, cart) => {
-        return total + cart.cartsDetail.reduce((cartTotal, item) => {
-          return cartTotal + (this.getProductPrice(item.prodID) * item.quantity);
-        }, 0);
-      }, 0);
-    },
-    async updateCart(cartID, prodID, quantity) {
-      const cart = this.cartData.find(cart => cart.cartID === cartID);
-      const cartItem = cart.cartsDetail.find(item => item.prodID === prodID);
-      if (cartItem) {
-        cartItem.quantity = quantity;
-      }
-      await fetch(`https://67628fc046efb373237507fb.mockapi.io/carts/${cartID}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(cart),
-      });
-    },
-    increaseQuantity(cartID, prodID) {
-      const cart = this.cartData.find(cart => cart.cartID === cartID);
-      const cartItem = cart.cartsDetail.find(item => item.prodID === prodID);
-      if (cartItem && cartItem.quantity < this.getProductStock(prodID)) {
-        cartItem.quantity++;
-        this.updateCart(cartID, prodID, cartItem.quantity);
-      }
-    },
-    decreaseQuantity(cartID, prodID) {
-      const cart = this.cartData.find(cart => cart.cartID === cartID);
-      const cartItem = cart.cartsDetail.find(item => item.prodID === prodID);
-      if (cartItem && cartItem.quantity > 1) {
-        cartItem.quantity--;
-        this.updateCart(cartID, prodID, cartItem.quantity);
-      }
-    },
-    async removeProductFromCart(cartID, prodID) {
-      const cart = this.cartData.find(cart => cart.cartID === cartID);
-      const cartItemIndex = cart.cartsDetail.findIndex(item => item.prodID === prodID);
-      if (cartItemIndex !== -1) {
-        cart.cartsDetail.splice(cartItemIndex, 1);
-        await fetch(`https://67628fc046efb373237507fb.mockapi.io/carts/${cartID}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(cart),
-        });
-      }
-    },
-    goToPaymentPage() {
-      const totalCost = this.calculateTotalAmount(this.cartDetails);
-      this.$router.push({ 
-        name: 'payment', 
-        query: { 
-          username: this.customerName, 
-          totalCost: totalCost
-        } 
-      });
-    },
-  },
-  filters: {
-    currency(value) {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-    }
-  },
-  mounted() {
-    this.fetchCartData();
-    this.fetchProductData();
-    this.fetchUserData();
-  }
-};
+  };
 </script>
 
 <style scoped>
@@ -503,7 +387,7 @@ export default {
   .cart-content {
     grid-template-columns: 1fr;
   }
-  
+
   .cart-summary {
     position: static;
   }
@@ -513,15 +397,15 @@ export default {
   .cart-view {
     padding: 1rem;
   }
-  
+
   .cart-title {
     font-size: 2rem;
   }
-  
+
   .cart-item {
     flex-direction: column;
   }
-  
+
   .product-image-container {
     width: 100%;
     height: 240px;
