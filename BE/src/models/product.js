@@ -103,15 +103,32 @@ class Product {
 const productMethods = {
     getAllProducts: async () => {
         try {
+            // Fetching the products from the database
             const res = await db('products');
+
+            // Check if the response is null or undefined
             if (res === null || res === undefined) {
                 throw new Error('No products found in database.');
             }
-            return res;
+
+            // Ensure prodID is a string and add leading zeros if necessary
+            const productsWithStringIDs = res.map(product => {
+                // Convert prodID to string and ensure it has a fixed length with leading zeros
+                const prodID = String(product.prodID).padStart(5, '0'); // Adjust the number 5 to your desired length
+                return {
+                    ...product,
+                    prodID, // Ensure prodID is a padded string
+                };
+            });
+
+            // Return the products with the correctly formatted prodID
+            return productsWithStringIDs;
         } catch (error) {
+            // If there is an error, throw a detailed message
             throw new Error(`Failed to fetch product details: ${error.message}`);
         }
     },
+
 
     getProductByID: async (prodID) => {
         const res = await db('products')
@@ -157,33 +174,29 @@ const productMethods = {
                 prodIDs = [prodIDs];
             }
 
-            // Truy vấn thông tin sản phẩm từ bảng products
             const products = await db('products')
-                .select('prodID', 'prodName', 'price', 'description', 'stock')
+                .select('prodID', 'prodName', 'price', 'description', 'stock', 'mainImage', 'processor', 'ram', 'storage')
                 .whereIn('prodID', prodIDs);
 
             if (products.length === 0) {
                 throw new Error('No products found with the given IDs.');
             }
-
-            // Truy vấn danh mục liên quan từ bảng productsCategories và categories
             const categories = await db('productsCategories as pc')
                 .join('categories as c', 'pc.catID', 'c.catID')
-                .select('pc.prodID', 'c.catName')
+                .select('pc.prodID', 'pc.catID', 'c.catName')
                 .whereIn('pc.prodID', prodIDs);
-
-            // Tạo một map để nhóm danh mục theo prodID
             const categoryMap = {};
             categories.forEach((cat) => {
                 if (!categoryMap[cat.prodID]) {
                     categoryMap[cat.prodID] = [];
                 }
-                categoryMap[cat.prodID].push(cat.catName);
+                categoryMap[cat.prodID].push({ catID: cat.catID, catName: cat.catName });
             });
 
-            // Gắn danh mục vào từng sản phẩm
             products.forEach((product) => {
-                product.catNames = categoryMap[product.prodID] || []; // Nếu không có danh mục, gắn mảng rỗng
+                product.prodID = String(product.prodID).padStart(5, '0'); // padStart để thêm '0' nếu cần
+
+                product.category = categoryMap[product.prodID] || [];
             });
 
             return products;
@@ -191,6 +204,7 @@ const productMethods = {
             throw new Error(`Failed to fetch product details: ${error.message}`);
         }
     },
+
 
 
     //undone
@@ -248,6 +262,40 @@ const productMethods = {
     changeProductStatusByID: (id, status) => {
         return db('products').where('prodID', id).update({ prodStatus: status });
     },
+
+    getProductsByCatID: async (catID) => {
+        try {
+            // Lấy danh sách prodID từ bảng 'productsCategories'
+            const proIDs = await db('productsCategories').select('prodID').where('catID', catID);
+
+            // Kiểm tra nếu không có sản phẩm nào trong category này
+            if (!proIDs || proIDs.length === 0) {
+                throw new Error('No products in this category!');
+            }
+
+            // Lấy thông tin sản phẩm từ bảng 'products' dựa trên danh sách prodID
+            const products = await db('products').whereIn('prodID', proIDs.map(item => item.prodID));
+
+            // Lấy tên category từ bảng 'categories'
+            const category = await db('categories').select('catName').where('catID', catID).first();
+
+            // Kiểm tra nếu không tìm thấy tên category
+            if (!category) {
+                throw new Error('Category not found');
+            }
+
+            return {
+                products: products,
+                catName: category.catName
+            };
+        } catch (error) {
+            throw new Error('Error fetching products by category: ' + error.message);
+        }
+    }
+
+
 };
+
+
 
 module.exports = { Product, productMethods };
