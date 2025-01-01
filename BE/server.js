@@ -3,6 +3,8 @@ const multer = require('multer');
 const cloudinary = require('./cloudinary');
 const upload = multer({ dest: 'uploads/' }); // Thư mục tạm
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
 
 const { db, checkDbConnection } = require('./src/config/db');
 
@@ -16,6 +18,16 @@ const discountRoutes = require('./src/routes/discount');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Cho phép tất cả các origin (CORS mở)
+app.use(cors());
+
+// Nếu cần chỉ định origin cụ thể
+app.use(cors({
+    origin: 'http://localhost:5173', // URL của frontend
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức được phép
+    allowedHeaders: ['Content-Type', 'Authorization'], // Các headers được phép
+}));
 
 app.use(express.json());
 
