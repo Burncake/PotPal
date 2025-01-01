@@ -22,26 +22,27 @@ const cartMethods = {
 
     addProductToCart: async (cartID, prodID, quantity) => {
         try {
-            // Kiểm tra sản phẩm có tồn tại và còn đủ số lượng
             const product = await db('products').where('prodID', prodID).first();
             if (!product) throw new Error(`Product with ID ${prodID} not found`);
-            if (product.stock < quantity) throw new Error('Insufficient stock for this product');
+            if (product.stock < quantity) throw new Error(`Insufficient stock for product ${prodID}`);
 
-            // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
             const existingProduct = await db('cartsDetails')
                 .where({ cartID, prodID })
                 .first();
 
             if (existingProduct) {
-                // Nếu đã có thì tăng số lượng lên
+                const newQuantity = existingProduct.quantity + quantity;
+                if (product.stock < newQuantity) {
+                    throw new Error(`Insufficient stock for product ${prodID} with requested quantity`);
+                }
+
                 return await db('cartsDetails')
                     .where({ cartID, prodID })
                     .update({
-                        quantity: existingProduct.quantity + quantity,
-                        totalPrice: (existingProduct.quantity + quantity) * existingProduct.unitPrice
+                        quantity: newQuantity,
+                        totalPrice: newQuantity * existingProduct.unitPrice
                     });
             } else {
-                // Nếu chưa có thì thêm mới
                 return await db('cartsDetails')
                     .insert({
                         cartID,
@@ -58,9 +59,16 @@ const cartMethods = {
 
     removeProductFromCart: async (cartID, prodID) => {
         try {
+            const cartItem = await db('cartsDetails')
+                .where({ cartID, prodID })
+                .first();
+
+            if (!cartItem) throw new Error(`Product ${prodID} not found in cart`);
+
             const result = await db('cartsDetails')
                 .where({ cartID, prodID })
                 .del();
+
             return result;
         } catch (error) {
             throw new Error(`Failed to remove product from cart: ${error.message}`);
@@ -91,6 +99,17 @@ const cartMethods = {
         }
     },
 
+    validateProductStock: async (prodID, quantity) => {
+        try {
+            const product = await db('products').where('prodID', prodID).first();
+            if (!product) throw new Error(`Product with ID ${prodID} not found`);
+            if (product.stock < quantity) throw new Error(`Insufficient stock for product ${prodID}`);
+            return true;
+        } catch (error) {
+            throw new Error(`Stock validation failed: ${error.message}`);
+        }
+    }
+
     checkCartAvailability: async (cartID) => {
         try {
             const cartDetails = await db('cartsDetails')
@@ -111,3 +130,5 @@ const cartMethods = {
 }
 
 module.exports = cartMethods;
+
+

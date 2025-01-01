@@ -6,9 +6,11 @@ const addToCart = async (req, res) => {
     try {
         let cart = await cartMethods.getCartByUserID(userID);
         if (!cart) {
-            // If cart does not exist, create a new cart for the user
             cart = await cartMethods.createCart(userID);
         }
+
+        // Check inventory
+        await cartMethods.validateProductStock(prodID, quantity);
 
         await cartMethods.addProductToCart(cart.cartID, prodID, quantity);
         return res.status(200).json({ message: 'Product added to cart successfully' });
@@ -17,7 +19,6 @@ const addToCart = async (req, res) => {
     }
 };
 
-
 const removeFromCart = async (req, res) => {
     const { userID, prodID } = req.body;
     try {
@@ -25,7 +26,7 @@ const removeFromCart = async (req, res) => {
         if (!cart) return res.status(404).json({ error: 'Cart not found' });
 
         await cartMethods.removeProductFromCart(cart.cartID, prodID);
-        return res.status(200).json({ message: 'Product removed from cart' });
+        return res.status(200).json({ message: 'Product removed from cart successfully' });
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }
@@ -71,10 +72,79 @@ const getAllCarts = async (req, res) => {
     }
 };
 
+const convertCartToOrder = async (req, res) => {
+    const { userID, phoneNumber, address, payMethod, note, discountID } = req.body;
+
+    try {
+        // Lấy Cart của người dùng
+        const cart = await cartMethods.getCartByUserID(userID);
+        if (!cart) return res.status(404).json({ error: 'Cart not found' });
+
+        // Lấy danh sách sản phẩm trong Cart
+        const cartDetails = await db('cartsDetails').where('cartID', cart.cartID);
+        if (cartDetails.length === 0) return res.status(400).json({ error: 'Cart is empty' });
+
+        // Kiểm tra tồn kho cho từng sản phẩm
+        for (const item of cartDetails) {
+            const product = await db('products').where('prodID', item.prodID).first();
+            if (!product || product.stock < item.quantity) {
+                return res.status(400).json({
+                    error: `Insufficient stock for product ${item.prodID}`
+                });
+            }
+        }
+
+        // Tạo đơn hàng mới
+        const [newOrder] = await db('orders')
+            .insert({
+                cusID: userID,
+                phoneNumber,
+                address,
+                orderStatus: 'Pending', // Trạng thái mặc định
+                createAt: new Date(),
+                payMethod,
+                orderDate: new Date(),
+                totalCost: cartDetails.reduce((sum, item) => sum + item.totalPrice, 0),
+                note,
+                discountID
+            })
+            .returning('*');
+
+        // Chuyển sản phẩm từ Cart sang OrderDetails
+        for (const item of cartDetails) {
+            await db('ordersDetails').insert({
+                orderID: newOrder.orderID,
+                prodID: item.prodID,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                totalPrice: item.totalPrice
+            });
+
+            // Cập nhật tồn kho
+            await db('products')
+                .where('prodID', item.prodID)
+                .decrement('stock', item.quantity);
+        }
+
+        // Xóa sản phẩm trong Cart
+        await db('cartsDetails').where('cartID', cart.cartID).del();
+
+        return res.status(200).json({
+            message: 'Order created successfully',
+            order: newOrder
+        });
+    } catch (error) {
+        return res.status(400).json({ error: `Failed to create order: ${error.message}` });
+    }
+};
+
+
+
 module.exports = {
     addToCart,
     removeFromCart,
     updateCartQuantity,
     validateCart,
-    getAllCarts
+    getAllCarts,
+    convertCartToOrder
 };

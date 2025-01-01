@@ -5,7 +5,8 @@ const {
     removeFromCart,
     updateCartQuantity,
     validateCart,
-    getAllCarts
+    getAllCarts,
+    convertCartToOrder
 } = require('../controllers/checkout');
 
 const router = express.Router();
@@ -24,6 +25,7 @@ router.get('/cart/all', getAllCarts);
 // Route: Validate cart (check stock availability)
 router.get('/cart/items/validate', validateCart);
 
-
+// Route: Convert Cart to Order
+router.post('/cart/checkout', convertCartToOrder);
 
 module.exports = router;
