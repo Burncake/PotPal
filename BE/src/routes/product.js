@@ -5,7 +5,8 @@ const {
     getAllProducts,
     getProductByID,
     getDetailProductByProdID,
-    getRelatedProductsByProID
+    getRelatedProductsByProID,
+    getProductsByCatID
 } = require('../controllers/product');
 
 const router = express.Router();
@@ -14,6 +15,7 @@ router.get('/general/all', getAllProducts);
 router.get('/general/:id', getProductByID);
 router.get('/detail/:id', getDetailProductByProdID);
 router.get('/related/:id', getRelatedProductsByProID);
+router.get('/category/:id', getProductsByCatID);
 
 router.get('/search/', );
 router.post('/add/', );

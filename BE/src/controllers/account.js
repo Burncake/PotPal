@@ -57,6 +57,7 @@ const accountController = {
         }
     },
 
+    // Đăng ký tài khoản
     register: async (req, res) => {
         try {
             const { username, password, email, phone } = req.body;
@@ -118,6 +119,24 @@ const accountController = {
             return res.status(500).json({
                 status: 'error',
                 message: error.message,
+            });
+        }
+    },
+
+    // Lấy danh sách tất cả tài khoản
+    getAllAccount: async (req, res) => {
+        try {
+            // Lấy tất cả tài khoản từ database
+            const accounts = await accountMethods.getAllAccounts();
+
+            return res.status(200).json({
+                status: 'success',
+                data: accounts,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: 'error',
+                message: `Failed to fetch accounts: ${error.message}`,
             });
         }
     },

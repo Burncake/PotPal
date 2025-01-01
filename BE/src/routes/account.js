@@ -4,6 +4,7 @@ const accountController = require('../controllers/account');
 
 router.post('/register', accountController.register);
 router.post('/login', accountController.login);
-router.get('/:username', accountController.getAccount);
-
+router.get('/account/:username', accountController.getAccount);
+router.get('/user', accountController.getAllAccount);
+router.get('/')
 module.exports = router;

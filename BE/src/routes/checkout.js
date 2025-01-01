@@ -4,18 +4,26 @@ const {
     addToCart,
     removeFromCart,
     updateCartQuantity,
-    validateCart
+    validateCart,
+    getAllCarts
 } = require('../controllers/checkout');
 
 const router = express.Router();
 
-// Route: Thêm sản phẩm vào giỏ hàng
-router.put('/cart/add-to-cart', addToCart);
-// Route: Xóa sản phẩm khỏi giỏ hàng
-router.put('/cart/remove-from-cart', removeFromCart);
-// Route: Cập nhật số lượng sản phẩm trong giỏ hàng
-router.put('/cart/update-cart-quantity', updateCartQuantity);
-// Route: Kiểm tra tính hợp lệ của giỏ hàng (kiểm tra số lượng trong kho)
-router.get('/cart/validate-cart', validateCart);
+/// Route: Add product to cart
+router.put('/cart/items/add', addToCart);
+
+// Route: Remove product from cart
+router.put('/cart/items/remove', removeFromCart);
+
+// Route: Update product quantity in cart
+router.put('/cart/items/update-quantity', updateCartQuantity);
+
+router.get('/cart/all', getAllCarts);
+
+// Route: Validate cart (check stock availability)
+router.get('/cart/items/validate', validateCart);
+
+
 
 module.exports = router;

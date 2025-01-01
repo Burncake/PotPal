@@ -30,30 +30,79 @@ const getDetailProductByProdID = async (req, res) => {
 };
 
 const getRelatedProductsByProID = async (req, res) => {
-    const prodID = req.params.id; // Lấy prodID từ URL params
-    const limit = req.query.limit || 5; // Lấy limit từ query hoặc mặc định là 5
+    const prodID = req.params.id; // Get prodID from URL params
+    const limit = req.query.limit || 5; // Get limit from query or default to 5
+
+    // Ensure prodID is a string and add leading zeros if necessary
+    const formattedProdID = String(prodID).padStart(5, '0'); // Ensure the ID is a string with padding
 
     try {
-        // Gọi phương thức model để lấy sản phẩm liên quan
-        const relatedProducts = await productMethods.relatedProductsByProID(prodID, limit);
+        // Call the model method to get related products
+        let relatedProducts = await productMethods.relatedProductsByProID(formattedProdID, limit);
 
-        // Trả kết quả dưới dạng JSON
+        // Format the prodID for each related product
+        relatedProducts = relatedProducts.map(product => {
+            const paddedProdID = String(product.prodID).padStart(5, '0'); // Format the prodID with leading zeros
+            return {
+                ...product,
+                prodID: paddedProdID, // Assign the formatted prodID
+            };
+        });
+
+        // Return the result as a JSON response
         return res.status(200).json({
-            "status": "success",
-            "data": relatedProducts
+            status: 'success',
+            data: relatedProducts
         });
     } catch (error) {
-        // Xử lý lỗi và trả thông báo lỗi
+        // Handle errors and return error message
         return res.status(400).json({
-            "status": "error",
-            "message": error.message
+            status: 'error',
+            message: error.message
         });
     }
 };
+const getProductsByCatID = async (req, res) => {
+    const { id } = req.params; // Lấy catID từ tham số URL đúng cách
+    try {
+        // Gọi phương thức trong model để lấy sản phẩm theo catID
+        const result = await productMethods.getProductsByCatID(id);
+
+        const products = result.products;
+        const catName = result.catName;
+
+        // Định dạng lại prodID cho từng sản phẩm
+        const formattedProducts = products.map(product => {
+            // Đảm bảo prodID có ít nhất 5 ký tự và có thêm số 0 ở phía trước nếu cần
+            const formattedProdID = String(product.prodID).padStart(5, '0');
+            return {
+                ...product,
+                prodID: formattedProdID, // Cập nhật lại prodID với định dạng đúng
+            };
+        });
+
+        // Trả về sản phẩm đã định dạng
+        return res.status(200).json({
+            status: 'success',
+            data: {
+                products: formattedProducts,
+                catName: catName
+            }
+        });
+    } catch (e) {
+        return res.status(500).json({
+            status: 'error',
+            message: e.message
+        });
+    }
+};
+
+
 
 module.exports = {
     getAllProducts,
     getProductByID,
     getDetailProductByProdID,
-    getRelatedProductsByProID
+    getRelatedProductsByProID,
+    getProductsByCatID
 }
