@@ -108,7 +108,7 @@ const cartMethods = {
         } catch (error) {
             throw new Error(`Stock validation failed: ${error.message}`);
         }
-    }
+    },
 
     checkCartAvailability: async (cartID) => {
         try {
