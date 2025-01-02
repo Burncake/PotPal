@@ -6,26 +6,20 @@ const {
     updateCartQuantity,
     validateCart,
     getAllCarts,
-    convertCartToOrder
+    convertCartToOrder,
+    getAllOrdersByUserID,
+    getAllOrdersForAdmin,
+    getCartByCustomerID
 } = require('../controllers/checkout');
 
 const router = express.Router();
 
-/// Route: Add product to cart
 router.put('/cart/items/add', addToCart);
-
-// Route: Remove product from cart
 router.put('/cart/items/remove', removeFromCart);
-
-// Route: Update product quantity in cart
 router.put('/cart/items/update-quantity', updateCartQuantity);
-
+router.get('/cart/customer/:id', getCartByCustomerID);
 router.get('/cart/all', getAllCarts);
-
-// Route: Validate cart (check stock availability)
 router.get('/cart/items/validate', validateCart);
-
-// Route: Convert Cart to Order
 router.post('/cart/checkout', convertCartToOrder);
 
 module.exports = router;

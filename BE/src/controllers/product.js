@@ -97,12 +97,54 @@ const getProductsByCatID = async (req, res) => {
     }
 };
 
+const addProduct = async (req, res) => {
+    try {
+        const productData = req.body;
 
+
+        // Kiểm tra dữ liệu từ client
+        if (!productData.prodName || !productData.price || !productData.stock) {
+            return res.status(400).json({ status: 'error', message: 'Missing required fields' });
+
+        }
+        // Thêm sản phẩm vào cơ sở dữ liệu
+
+        const newProduct = await productMethods.addProduct(productData);
+
+        // Trả kết quả về frontend
+        return res.status(201).json({ status: 'success', data: newProduct });
+    } catch (error) {
+        return res.status(400).json({ status: 'error', message: error.message });
+    }
+};
+
+const updateProduct = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await productMethods.updateProduct(id, req.body, req.files);
+        return res.status(200).json({ status: 'success', message: 'Product updated successfully', data: result });
+    } catch (error) {
+        return res.status(400).json({ status: 'error', message: error.message });
+    }
+};
+
+const deleteProduct = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await productMethods.deleteProduct(id);
+        return res.status(200).json({ status: 'success', message: 'Product deleted successfully' });
+    } catch (error) {
+        return res.status(400).json({ status: 'error', message: error.message });
+    }
+};
 
 module.exports = {
     getAllProducts,
     getProductByID,
     getDetailProductByProdID,
     getRelatedProductsByProID,
-    getProductsByCatID
+    getProductsByCatID,
+    addProduct,
+    updateProduct,
+    deleteProduct
 }

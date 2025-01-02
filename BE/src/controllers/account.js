@@ -1,4 +1,5 @@
 const accountMethods = require('../models/account');
+const {generateToken}= require('../utils/generator');
 
 const accountController = {
     // Thêm tài khoản mới
@@ -8,7 +9,7 @@ const accountController = {
 
             // Kiểm tra đầu vào
             if (!username || !password || !email) {
-                return res.status(400).json({ status: 'error', message: 'Missing required fields.' });
+                return res.status(401).json({ status: 'error', message: 'Missing required fields.' });
             }
 
             // Thêm tài khoản
@@ -31,15 +32,15 @@ const accountController = {
     login: async (req, res) => {
         try {
             const { username, password } = req.body;
-
+            console.log(username, password);
             // Kiểm tra đầu vào
             if (!username || !password) {
                 return res.status(400).json({ status: 'error', message: 'Username and password are required.' });
             }
-
             // Kiểm tra mật khẩu
             const account = await accountMethods.validatePassword(username, password);
-
+            account.token = await generateToken(account);
+            accountMethods.updateToken(account);
             return res.status(200).json({
                 status: 'success',
                 message: 'Login successful.',
@@ -47,6 +48,7 @@ const accountController = {
                     accountID: account.accountID,
                     username: account.username,
                     email: account.email,
+                    token: account.token
                 },
             });
         } catch (error) {

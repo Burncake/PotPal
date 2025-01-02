@@ -73,12 +73,12 @@ const accountMethods = {
             // Lấy mật khẩu hash từ database dựa trên username
             const account = await db('users').where('username', username).first();
             if (!account) throw new Error('Account not found');
-
             // So sánh mật khẩu nhập vào với mật khẩu đã hash
-            const isMatch = await bcrypt.compare(inputPassword, account.password);
+            const isMatch = (inputPassword===account.password)
+            // const isMatch = await bcrypt.compare(inputPassword, account.password);
             if (!isMatch) throw new Error('Invalid password');
 
-            return account; // Đăng nhập thành công
+            return account;
         } catch (error) {
             throw new Error(`Password validation failed: ${error.message}`);
         }
@@ -93,7 +93,14 @@ const accountMethods = {
         return await db('users').where('phoneNumber', phone).first();
     },
 
-
+    updateToken: async (account) => {
+        try {
+            db('users').where('userID', account.accountID).update('tokens', account.token);
+        }
+        catch (error){
+            throw new Error(`Cant set token for user: ${error.message}`);
+        }
+    }
 };
 
 module.exports = accountMethods;

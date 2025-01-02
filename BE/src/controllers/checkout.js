@@ -1,5 +1,5 @@
 const cartMethods = require('../models/checkout');
-
+const { db } = require('../config/db');
 
 const addToCart = async (req, res) => {
     const { userID, prodID, quantity } = req.body;
@@ -9,7 +9,6 @@ const addToCart = async (req, res) => {
             cart = await cartMethods.createCart(userID);
         }
 
-        // Check inventory
         await cartMethods.validateProductStock(prodID, quantity);
 
         await cartMethods.addProductToCart(cart.cartID, prodID, quantity);
@@ -76,15 +75,12 @@ const convertCartToOrder = async (req, res) => {
     const { userID, phoneNumber, address, payMethod, note, discountID } = req.body;
 
     try {
-        // Lấy Cart của người dùng
         const cart = await cartMethods.getCartByUserID(userID);
         if (!cart) return res.status(404).json({ error: 'Cart not found' });
 
-        // Lấy danh sách sản phẩm trong Cart
         const cartDetails = await db('cartsDetails').where('cartID', cart.cartID);
         if (cartDetails.length === 0) return res.status(400).json({ error: 'Cart is empty' });
 
-        // Kiểm tra tồn kho cho từng sản phẩm
         for (const item of cartDetails) {
             const product = await db('products').where('prodID', item.prodID).first();
             if (!product || product.stock < item.quantity) {
@@ -94,13 +90,12 @@ const convertCartToOrder = async (req, res) => {
             }
         }
 
-        // Tạo đơn hàng mới
         const [newOrder] = await db('orders')
             .insert({
                 cusID: userID,
                 phoneNumber,
                 address,
-                orderStatus: 'Pending', // Trạng thái mặc định
+                orderStatus: 'Pending',
                 createAt: new Date(),
                 payMethod,
                 orderDate: new Date(),
@@ -110,7 +105,6 @@ const convertCartToOrder = async (req, res) => {
             })
             .returning('*');
 
-        // Chuyển sản phẩm từ Cart sang OrderDetails
         for (const item of cartDetails) {
             await db('ordersDetails').insert({
                 orderID: newOrder.orderID,
@@ -120,13 +114,11 @@ const convertCartToOrder = async (req, res) => {
                 totalPrice: item.totalPrice
             });
 
-            // Cập nhật tồn kho
             await db('products')
                 .where('prodID', item.prodID)
                 .decrement('stock', item.quantity);
         }
 
-        // Xóa sản phẩm trong Cart
         await db('cartsDetails').where('cartID', cart.cartID).del();
 
         return res.status(200).json({
@@ -138,7 +130,57 @@ const convertCartToOrder = async (req, res) => {
     }
 };
 
+const getAllOrdersByUserID = async (req, res) => {
+    const { userID } = req.params;
+    try {
+        const orders = await db('orders')
+            .where('cusID', userID)
+            .select('*');
 
+        return res.status(200).json({
+            message: 'Orders retrieved successfully',
+            data: orders
+        });
+    } catch (error) {
+        return res.status(400).json({ error: `Failed to fetch orders: ${error.message}` });
+    }
+};
+
+const getAllOrdersForAdmin = async (req, res) => {
+    try {
+        const orders = await db('orders').select('*');
+
+        return res.status(200).json({
+            message: 'All orders retrieved successfully',
+            data: orders
+        });
+    } catch (error) {
+        return res.status(400).json({ error: `Failed to fetch orders: ${error.message}` });
+    }
+};
+
+const getCartByCustomerID = async (req, res) => {
+    const { id: customerID } = req.params;
+
+    try {
+        const cart = await cartMethods.getCartByUserID(customerID);
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found for the given customer ID.' });
+        }
+
+        const cartDetails = await cartMethods.getAllCarts();
+
+        const customerCart = cartDetails.find(item => item.customerID === customerID);
+
+        if (!customerCart) {
+            return res.status(404).json({ message: 'Cart details not found for the given customer ID.' });
+        }
+
+        res.status(200).json(customerCart);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
 
 module.exports = {
     addToCart,
@@ -146,5 +188,8 @@ module.exports = {
     updateCartQuantity,
     validateCart,
     getAllCarts,
-    convertCartToOrder
+    convertCartToOrder,
+    getAllOrdersByUserID,
+    getAllOrdersForAdmin,
+    getCartByCustomerID
 };

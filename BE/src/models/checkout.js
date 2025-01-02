@@ -1,22 +1,45 @@
-const db = require('../config/db'); // Giả sử bạn đang dùng knex hoặc sequelize
+const { db } = require('../config/db'); // Ensure db is correctly configured
 
 const cartMethods = {
     getCartByUserID: async (userID) => {
         try {
             return await db('carts')
                 .where('cusID', userID)
-                .first(); // Trả về giỏ hàng của người dùng (nếu có)
+                .first();
         } catch (error) {
             throw new Error(`Failed to fetch cart: ${error.message}`);
         }
     },
 
-    getCartDetails: async (cartID) => {
+    createCart: async (userID) => {
         try {
-            return await db('cartsDetails')
-                .where('cartID', cartID);
+            const formattedCartID = userID.padStart(5, '0');
+            const [newCart] = await db('carts')
+                .insert({ cusID: userID, cartID: formattedCartID })
+                .returning('*');
+            return newCart;
         } catch (error) {
-            throw new Error(`Failed to fetch cart details: ${error.message}`);
+            throw new Error(`Failed to create cart: ${error.message}`);
+        }
+    },
+
+    getAllCarts: async () => {
+        try {
+            const carts = await db('carts').select('cartID', 'cusID', 'createAt');
+            const cartsWithDetails = await Promise.all(carts.map(async (cart) => {
+                const cartDetails = await db('cartsDetails')
+                    .where('cartID', cart.cartID)
+                    .select('cartID', 'prodID', 'quantity');
+                return {
+                    cartID: cart.cartID,
+                    customerID: cart.cusID,
+                    createAt: cart.createAt,
+                    cartsDetail: cartDetails
+                };
+            }));
+            return cartsWithDetails;
+        } catch (error) {
+            throw new Error(`Failed to fetch all carts: ${error.message}`);
         }
     },
 
@@ -24,23 +47,18 @@ const cartMethods = {
         try {
             const product = await db('products').where('prodID', prodID).first();
             if (!product) throw new Error(`Product with ID ${prodID} not found`);
-            if (product.stock < quantity) throw new Error(`Insufficient stock for product ${prodID}`);
+            if (product.stock < quantity) throw new Error('Insufficient stock');
 
             const existingProduct = await db('cartsDetails')
                 .where({ cartID, prodID })
                 .first();
 
             if (existingProduct) {
-                const newQuantity = existingProduct.quantity + quantity;
-                if (product.stock < newQuantity) {
-                    throw new Error(`Insufficient stock for product ${prodID} with requested quantity`);
-                }
-
                 return await db('cartsDetails')
                     .where({ cartID, prodID })
                     .update({
-                        quantity: newQuantity,
-                        totalPrice: newQuantity * existingProduct.unitPrice
+                        quantity: existingProduct.quantity + quantity,
+                        totalPrice: (existingProduct.quantity + quantity) * existingProduct.unitPrice
                     });
             } else {
                 return await db('cartsDetails')
@@ -62,14 +80,8 @@ const cartMethods = {
             const cartItem = await db('cartsDetails')
                 .where({ cartID, prodID })
                 .first();
-
             if (!cartItem) throw new Error(`Product ${prodID} not found in cart`);
-
-            const result = await db('cartsDetails')
-                .where({ cartID, prodID })
-                .del();
-
-            return result;
+            return await db('cartsDetails').where({ cartID, prodID }).del();
         } catch (error) {
             throw new Error(`Failed to remove product from cart: ${error.message}`);
         }
@@ -77,17 +89,15 @@ const cartMethods = {
 
     updateProductQuantityInCart: async (cartID, prodID, quantity) => {
         try {
-            // Kiểm tra số lượng sản phẩm trong kho
             const product = await db('products').where('prodID', prodID).first();
             if (!product) throw new Error(`Product with ID ${prodID} not found`);
-            if (product.stock < quantity) throw new Error('Insufficient stock for this product');
+            if (product.stock < quantity) throw new Error('Insufficient stock');
 
             const existingProduct = await db('cartsDetails')
                 .where({ cartID, prodID })
                 .first();
             if (!existingProduct) throw new Error('Product not found in cart');
 
-            // Cập nhật số lượng và tổng giá trị sản phẩm
             return await db('cartsDetails')
                 .where({ cartID, prodID })
                 .update({
@@ -112,12 +122,9 @@ const cartMethods = {
 
     checkCartAvailability: async (cartID) => {
         try {
-            const cartDetails = await db('cartsDetails')
-                .where('cartID', cartID);
+            const cartDetails = await db('cartsDetails').where('cartID', cartID);
             for (const item of cartDetails) {
-                const product = await db('products')
-                    .where('prodID', item.prodID)
-                    .first();
+                const product = await db('products').where('prodID', item.prodID).first();
                 if (!product || product.stock < item.quantity) {
                     throw new Error(`Insufficient stock for product ${item.prodID}`);
                 }
@@ -126,9 +133,7 @@ const cartMethods = {
         } catch (error) {
             throw new Error(`Cart validation failed: ${error.message}`);
         }
-    },
-}
+    }
+};
 
 module.exports = cartMethods;
-
-

@@ -6,5 +6,5 @@ router.post('/register', accountController.register);
 router.post('/login', accountController.login);
 router.get('/account/:username', accountController.getAccount);
 router.get('/user', accountController.getAllAccount);
-router.get('/')
+
 module.exports = router;

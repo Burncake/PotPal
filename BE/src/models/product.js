@@ -99,7 +99,6 @@ class Product {
     }
 }
 
-// Tạo object chứa các hàm thao tác với sản phẩm
 const productMethods = {
     getAllProducts: async () => {
         try {
@@ -135,18 +134,16 @@ const productMethods = {
             .where('prodID', prodID);
     },
 
-    addProduct: (product) => {
-        return db('products').insert(product);
-    },
+    // addProduct: (product) => {
+    //     return db('products').insert(product);
+    // },
 
-    updateProduct: (id, product) => {
-        return db('products').where('prodID', id).update(product);
-    },
 
-    deleteProductByID: async (id) => {
-        const result = await db('products').where('prodID', id).del();
-        return result;
-    },
+
+    // deleteProductByID: async (id) => {
+    //     const result = await db('products').where('prodID', id).del();
+    //     return result;
+    // },
 
     getProductsByCatId: async (catID, page, limit) => {
         const data = await db('products')
@@ -164,6 +161,101 @@ const productMethods = {
 
     searchProducts: async (keyword) => {
         return db('products').where('prodName', 'like', `%${keyword}%`);
+    },
+    generateProdID: async () => {
+        let newProdID;
+        let exists = true;
+
+        // Lặp lại quá trình sinh mã mới cho đến khi không trùng với bất kỳ mã nào trong cơ sở dữ liệu
+        while (exists) {
+            // Sinh mã ngẫu nhiên có dạng 5 ký tự (chữ và số)
+            newProdID = Math.random().toString(36).substring(2, 7).toUpperCase();
+
+            // Kiểm tra xem prodID này đã tồn tại trong cơ sở dữ liệu chưa
+            const existingProd = await db('products').where({ prodID: newProdID }).first();
+            if (!existingProd) {
+                exists = false;  // Nếu không tồn tại thì dừng vòng lặp
+            }
+        }
+
+        return newProdID;
+    },
+
+    // Hàm thêm sản phẩm
+    addProduct: async (productData) => {
+        try {
+            // Generate a new product ID
+            const prodID = await productMethods.generateProdID();
+            console.log(prodID);
+            await db('products').insert({
+                prodID,
+                prodName: productData.prodName || '', // Default to an empty string if undefined
+                price: productData.price ?? 0.0, // Default to 0.0 if undefined
+                stock: productData.stock ?? 0, // Default to 0 if undefined
+                prodStatus: productData.prodStatus || 'inactive', // Default to 'inactive' if undefined
+                mainImage: productData.mainImage || '', // Default to empty string if undefined
+                description: productData.description || '', // Default to empty string if undefined
+                processor: productData.processor || '', // Default to empty string if undefined
+                ram: productData.ram || '', // Default to empty string if undefined
+                storage: productData.storage || '', // Default to empty string if undefined
+                createAt: new Date(), // Automatically set the creation timestamp
+                modAt: new Date() // Automatically set the modification timestamp
+                // discountID: productData.discountID ?? '00000'
+            });
+            console.log(1);
+            // Retrieve the newly inserted product
+            const [newProduct] = await db('products').where({ prodID }).select('*');
+            // await db('productsCategories').update('')
+            return newProduct;
+        } catch (error) {
+
+            console.log(`Failed to add product: ${error.message}`);
+
+        }
+    },
+
+
+    updateProduct: async (id, productData) => {
+        try {
+            // Lấy sản phẩm hiện tại từ cơ sở dữ liệu
+            const existingProduct = await db('products').where({ prodID: id }).first();
+            if (!existingProduct) throw new Error('Product not found');
+            // Xây dựng dữ liệu cập nhật
+            const updatedData = {
+                prodName: productData.prodName !== undefined ? productData.prodName : existingProduct.prodName,
+                price: productData.price !== undefined ? productData.price : existingProduct.price,
+                stock: productData.stock !== undefined ? productData.stock : existingProduct.stock,
+                prodStatus: productData.prodStatus !== undefined ? productData.prodStatus : existingProduct.prodStatus,
+                mainImage: productData.mainImage !== undefined ? productData.mainImage : existingProduct.mainImage,
+                description: productData.description !== undefined ? productData.description : existingProduct.description,
+                processor: productData.processor !== undefined ? productData.processor : existingProduct.processor,
+                ram: productData.ram !== undefined ? productData.ram : existingProduct.ram,
+                storage: productData.storage !== undefined ? productData.storage : existingProduct.storage,
+                // catID: productData.catID !== undefined ? productData.catID : existingProduct.catID,
+                modAt: new Date(), // Luôn cập nhật thời gian sửa đổi
+            };
+
+            // Chua update cate
+            // Thực hiện cập nhật
+            await db('products').where({ prodID: id }).update(updatedData);
+
+            // Truy vấn sản phẩm sau khi cập nhật
+            const updatedProduct = await db('products').where({ prodID: id }).first();
+
+            return updatedProduct;
+        } catch (error) {
+            throw new Error(`Failed to update product: ${error.message}`);
+        }
+    },
+
+
+    deleteProduct: async (id) => {
+        try {
+            const deleted = await db('products').where({ prodID: id }).del();
+            if (!deleted) throw new Error('Product not found');
+        } catch (error) {
+            throw new Error(`Failed to delete product: ${error.message}`);
+        }
     },
 
     //done
@@ -204,8 +296,6 @@ const productMethods = {
             throw new Error(`Failed to fetch product details: ${error.message}`);
         }
     },
-
-
 
     //undone
     relatedProductsByCatID: (catID, limit) => {
