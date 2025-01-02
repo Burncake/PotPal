@@ -1,0 +1,5 @@
+products : https://6754193836bcd1eec85023b2.mockapi.io/api/products
+cart : https://67628fc046efb373237507fb.mockapi.io/carts
+user : https://67628fc046efb373237507fb.mockapi.io/user
+order : https://676d499b0e299dd2ddff0c39.mockapi.io/orders/orders
+discounts : https://676d499b0e299dd2ddff0c39.mockapi.io/orders/discounts
