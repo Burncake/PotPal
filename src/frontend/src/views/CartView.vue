@@ -14,7 +14,11 @@
           <template v-else>
             <div v-for="item in cart.cartsDetail" :key="item.prodID" class="cart-item">
               <div class="product-image-container">
-                <img :src="getProductImage(item.prodID)" :alt="getProductName(item.prodID)" class="product-image" />
+                <img
+                  :src="getProductImage(item.prodID)"
+                  :alt="getProductName(item.prodID)"
+                  class="product-image"
+                />
               </div>
 
               <div class="product-info">
@@ -45,7 +49,9 @@
                   </div>
 
                   <div class="actions">
-                    <p class="total">Total: {{ getProductPrice(item.prodID) * item.quantity | currency }}</p>
+                    <p class="total">
+                      Total: {{ (getProductPrice(item.prodID) * item.quantity) | currency }}
+                    </p>
                     <button
                       @click="removeProductFromCart(cart.cartID, item.prodID)"
                       class="remove-button"
@@ -79,7 +85,7 @@
             </div>
           </div>
           <button
-            v-if="cartDetails.some(cart => cart.cartsDetail.length > 0)"
+            v-if="cartDetails.some((cart) => cart.cartsDetail.length > 0)"
             @click="goToPaymentPage"
             class="checkout-button"
           >
@@ -109,8 +115,9 @@ export default {
       cartData: [],
       productData: [],
       userData: [],
-    };
-  };
+    }
+  },
+}
 </script>
 
 <style scoped>
