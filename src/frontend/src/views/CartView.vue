@@ -1,7 +1,7 @@
 <template>
   <div class="cart-view">
     <div class="cart-header">
-      <h1 class="cart-title">{{ customerName }}'s Cart</h1>
+      <h1 class="cart-title">My Cart</h1>
     </div>
 
     <div v-if="hasItems" class="cart-content">
@@ -116,6 +116,126 @@ export default {
       productData: [],
       userData: [],
     }
+  },
+  computed: {
+    cartDetails() {
+      return this.cartData.filter((cart) => cart.customerID === this.customerID)
+    },
+    hasItems() {
+      return this.cartDetails.some((cart) => cart.cartsDetail && cart.cartsDetail.length > 0)
+    },
+  },
+  methods: {
+    async fetchCartData() {
+      const cartResponse = await fetch(
+        'http://127.0.0.1:3000/checkout/cart/customer/' + this.customerID,
+      )
+      this.cartData = await cartResponse.json()
+    },
+    async fetchProductData() {
+      const productResponse = await fetch('http://127.0.0.1:3000/product/general/all')
+      this.productData = await productResponse.json()
+    },
+    // async fetchUserData() {
+    //   const userResponse = await fetch('http://127.0.0.1:3000/user')
+    //   this.userData = await userResponse.json()
+    //   const user = this.userData.find((user) => user.userID === this.customerID)
+    //   this.customerName = user ? user.fullName : 'Unknown Customer'
+    // },
+    getProductName(prodID) {
+      const product = this.productData.find((product) => product.prodID === prodID)
+      return product ? product.prodName : 'Product name not found'
+    },
+    getProductDescription(prodID) {
+      const product = this.productData.find((product) => product.prodID === prodID)
+      return product ? product.description : 'No description available'
+    },
+    getProductPrice(prodID) {
+      const product = this.productData.find((product) => product.prodID === prodID)
+      return product ? product.price : 0
+    },
+    getProductImage(prodID) {
+      const product = this.productData.find((product) => product.prodID === prodID)
+      return product ? product.mainImage : ''
+    },
+    getProductStock(prodID) {
+      const product = this.productData.find((product) => product.prodID === prodID)
+      return product ? product.stock : 0
+    },
+    calculateTotalAmount(cartDetails) {
+      return cartDetails.reduce((total, cart) => {
+        return (
+          total +
+          cart.cartsDetail.reduce((cartTotal, item) => {
+            return cartTotal + this.getProductPrice(item.prodID) * item.quantity
+          }, 0)
+        )
+      }, 0)
+    },
+    async updateCart(cartID, prodID, quantity) {
+      const cart = this.cartData.find((cart) => cart.cartID === cartID)
+      const cartItem = cart.cartsDetail.find((item) => item.prodID === prodID)
+      if (cartItem) {
+        cartItem.quantity = quantity
+      }
+      await fetch(`http://127.0.0.1:3000/carts/${cartID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cart),
+      })
+    },
+    increaseQuantity(cartID, prodID) {
+      const cart = this.cartData.find((cart) => cart.cartID === cartID)
+      const cartItem = cart.cartsDetail.find((item) => item.prodID === prodID)
+      if (cartItem && cartItem.quantity < this.getProductStock(prodID)) {
+        cartItem.quantity++
+        this.updateCart(cartID, prodID, cartItem.quantity)
+      }
+    },
+    decreaseQuantity(cartID, prodID) {
+      const cart = this.cartData.find((cart) => cart.cartID === cartID)
+      const cartItem = cart.cartsDetail.find((item) => item.prodID === prodID)
+      if (cartItem && cartItem.quantity > 1) {
+        cartItem.quantity--
+        this.updateCart(cartID, prodID, cartItem.quantity)
+      }
+    },
+    async removeProductFromCart(cartID, prodID) {
+      const cart = this.cartData.find((cart) => cart.cartID === cartID)
+      const cartItemIndex = cart.cartsDetail.findIndex((item) => item.prodID === prodID)
+      if (cartItemIndex !== -1) {
+        cart.cartsDetail.splice(cartItemIndex, 1)
+        await fetch(`http://127.0.0.1:3000/carts/${cartID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(cart),
+        })
+      }
+    },
+    goToPaymentPage() {
+      const totalCost = this.calculateTotalAmount(this.cartDetails)
+      this.$router.push({
+        name: 'payment',
+        query: {
+          username: this.customerName,
+          totalCost: totalCost,
+        },
+      })
+    },
+  },
+  filters: {
+    currency(value) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+    },
+  },
+  mounted() {
+    this.fetchCartData()
+    this.fetchProductData()
+    this.fetchUserData()
   },
 }
 </script>

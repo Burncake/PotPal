@@ -24,9 +24,9 @@ export default {
           password: this.password,
         })
 
-        this.store.setToken(response.data.data.token)
-        this.store.setUser(response.data.data)
-        console.log('User:', response.data.data)
+        this.store.setToken(response.data.data.account.token)
+        this.store.setUser(response.data.data.account)
+        console.log('User:', response.data.data.account, response.data.data.account.token)
         this.$router.push('/')
       } catch (error) {
         console.log('err', error)

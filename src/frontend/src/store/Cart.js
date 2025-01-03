@@ -11,16 +11,16 @@ export const CartStore = defineStore('cart', {
   actions: {
     async loadCart() {
       const uStore = UserStore()
-      const customerID = uStore.user.id  // Use user ID as customerID
+      const customerID = uStore.user.id // Use user ID as customerID
 
       try {
         const response = await CartService.getCart(customerID)
         if (response.data.length > 0) {
-          const cartData = response.data[0]  // Assuming a single cart per customer
+          const cartData = response.data[0] // Assuming a single cart per customer
           this.cartID = cartData.cartID
           this.cart = cartData.cartsDetail || []
         } else {
-          this.cart = []  // No cart data for this user, initialize empty cart
+          this.cart = [] // No cart data for this user, initialize empty cart
         }
       } catch (error) {
         console.error('Error loading cart:', error)

@@ -15,27 +15,27 @@ export default {
     const toast = useToast()
 
     const addToCart = async () => {
-      const customerID = UserStore().user.userID
+      const userID = UserStore().user.userID
       const quant = 1
 
       try {
         // Call the API to add the product to the cart
-        const response = await axios.put('/cart/items/add', {
-          customerID,
-          productID: props.product.prodID,
+        const response = await axios.put('http://127.0.0.1:3000/checkout/cart/items/add', {
+          userID,
+          prodID: props.product.prodID,
           quantity: quant,
         })
 
         // Show success toast
         if (response.status === 200) {
-          toast.success('Added to cart successfully', {timeout: 1000})
+          toast.success('Added to cart successfully', { timeout: 1000 })
         }
       } catch (error) {
         toast.error('Error adding to cart')
       }
     }
 
-    return {addToCart}
+    return { addToCart }
   },
 }
 </script>
