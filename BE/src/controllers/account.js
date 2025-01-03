@@ -60,16 +60,10 @@ const accountController = {
                 return res.status(401).json({ status: 'error', message: 'Invalid credentials.' });
             }
 
-            // Log account info and payload before generating token
-            console.log('Account data before token generation:', account);
-
             // Tạo token
             const tokenPayload = { userID: account.userID, userName: account.userName }; // Limit payload data
             const token = await generateToken(tokenPayload); // Pass only necessary info
             account.token = token;
-
-            // Log token size
-            console.log('Generated Token Size:', Buffer.byteLength(token, 'utf8'));
 
             // Update token in database
             await accountMethods.updateToken(account);
@@ -77,13 +71,7 @@ const accountController = {
             return res.status(200).json({
                 status: 'success',
                 message: 'Login successful.',
-                data: {
-                    accountID: account.accountID,
-                    userName: account.userName,
-                    email: account.email,
-                    phoneNumber: account.phoneNumber,
-                    token: account.token,
-                },
+                data: {account},
             });
         } catch (error) {
             return res.status(400).json({
@@ -96,19 +84,20 @@ const accountController = {
     // Đăng ký tài khoản
     register: async (req, res) => {
         try {
-            const { userName, password, email, phoneNumber } = req.body;
-
-            // Log received input
-            console.log('Received input:', { userName, password, email, phoneNumber });
-
+            const { userName, password, email, phoneNumber, fullName } = req.body;
             // Kiểm tra đầu vào
             if (!userName || !password || !email || !phoneNumber) {
                 return res.status(400).json({ status: 'error', message: 'Missing required fields.' });
             }
 
-            // Kiểm tra email hoặc số điện thoại đã tồn tại chưa
+            // Kiểm tra email, số điện thoại và userName đã tồn tại chưa
             const existingEmail = await accountMethods.getAccountByEmail(email);
             const existingPhone = await accountMethods.getAccountByPhone(phoneNumber);
+            const existingUserName = await accountMethods.getAccountByUserName(userName);
+
+            if (existingUserName) {
+                return res.status(400).json({ status: 'error', message: 'User name is already in use.' });
+            }
 
             if (existingEmail) {
                 return res.status(400).json({ status: 'error', message: 'Email is already in use.' });
@@ -118,11 +107,14 @@ const accountController = {
                 return res.status(400).json({ status: 'error', message: 'Phone number is already in use.' });
             }
 
+            // Nếu fullName không có, gán mặc định là "Unknown"
+            const fullNameToStore = fullName || "Unknown";
+
             // Tạo userID
             const userID = generateID();
 
             // Thêm tài khoản
-            const newAccount = await accountMethods.addAccount(userID, userName, password, email, phoneNumber);
+            const newAccount = await accountMethods.addAccount(userID, userName, password, email, phoneNumber, fullNameToStore);
 
             return res.status(201).json({
                 status: 'success',
@@ -132,6 +124,7 @@ const accountController = {
                     userName,
                     email,
                     phoneNumber,
+                    fullName: fullNameToStore,
                 },
             });
         } catch (error) {
