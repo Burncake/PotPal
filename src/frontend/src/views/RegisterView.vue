@@ -38,19 +38,19 @@ export default {
           fullName: this.fullname,
           email: this.email,
           address: this.address,
-          phoneNumber: this.phoneNumber
+          phoneNumber: this.phoneNumber,
         })
-        this.data = response.data
-        this.store.setToken(this.data.tokens)
-        this.store.setUser(this.data)
-        // Create cart for new user
-        const cart = {
-          customerID: this.data.userID,
-          createAt: new Date().toISOString(),
-          cartsDetail: [],
-        }
-        await Api().post('/carts', cart)
-        
+        // this.data = response.data
+        // this.store.setToken(this.data.tokens)
+        // this.store.setUser(this.data)
+        // // Create cart for new user
+        // const cart = {
+        //   customerID: this.data.userID,
+        //   createAt: new Date().toISOString(),
+        //   cartsDetail: [],
+        // }
+        // await Api().post('/carts', cart)
+
         this.$router.push('/')
       } catch (error) {
         console.log('err', error)
@@ -134,7 +134,13 @@ export default {
       <!-- Phone Number input -->
       <div data-mdb-input-init class="form-outline mb-4">
         <label class="form-label" for="registerPhoneNumber">Phone Number</label>
-        <input type="text" id="registerPhoneNumber" class="form-control" v-model="phoneNumber" required />
+        <input
+          type="text"
+          id="registerPhoneNumber"
+          class="form-control"
+          v-model="phoneNumber"
+          required
+        />
       </div>
 
       <!-- Password input -->
