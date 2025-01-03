@@ -3,12 +3,11 @@ const bcrypt = require('bcrypt');
 
 const accountMethods = {
     // 1. Thêm tài khoản mới
-    addAccount: async (userID, userName, password, email, phoneNumber) => {
+    addAccount: async (userID, userName, password, email, phoneNumber, fullName = "Unknown", role = "Customer") => {
         try {
             if (!password) {
                 throw new Error('password is missing or invalid.');
             }
-
             const saltRounds = 10;
             const hashedpassword = await bcrypt.hash(password, saltRounds);
 
@@ -18,6 +17,8 @@ const accountMethods = {
                 password: hashedpassword,
                 email,
                 phoneNumber,
+                fullName,  // Including fullName
+                role,      // Including role with default value of 'Customer'
             });
 
             return result[0];
@@ -25,7 +26,6 @@ const accountMethods = {
             throw new Error(`Failed to create account: ${error.message}`);
         }
     },
-
     // 2. Lấy thông tin tài khoản theo userID
     getAccountByID: async (userID) => {
         try {
@@ -35,6 +35,10 @@ const accountMethods = {
         } catch (error) {
             throw new Error(`Failed to fetch account: ${error.message}`);
         }
+    },
+
+    getAccountByUserName: async (userName) => {
+        return await db('users').where('userName', userName).first();
     },
 
     // 3. Lấy danh sách tất cả tài khoản
@@ -118,7 +122,6 @@ const accountMethods = {
             throw new Error(`Failed to set token for user: ${error.message}`);
         }
     }
-
 };
 
 module.exports = accountMethods;
