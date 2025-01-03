@@ -28,9 +28,9 @@ function generateID(){
 }
 
 function generateToken(payload) {
-    // const payload = { userId, createdAt: Date.now() };
-    const token = jwt.sign(payload, process.env.SECRET_KEY, {expiresIn: '2h'});
+    // Ensure to only include essential user information in the payload
+    const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '2h' });
     return token;
 }
 
-module.exports = {generateID, generateOTP, generateToken};
+module.exports = { generateID, generateOTP, generateToken };

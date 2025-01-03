@@ -1,31 +1,35 @@
-const {db} = require('../config/db'); // Kết nối database
+const { db } = require('../config/db'); // Kết nối database
 const bcrypt = require('bcrypt');
-
 
 const accountMethods = {
     // 1. Thêm tài khoản mới
-    addAccount: async (username, password, email) => {
+    addAccount: async (userID, userName, password, email, phoneNumber) => {
         try {
-            const saltRounds = 10; // Số vòng lặp để tạo salt
-            const hashedPassword = await bcrypt.hash(password, saltRounds); // Hash mật khẩu
+            if (!password) {
+                throw new Error('password is missing or invalid.');
+            }
 
-            // Lưu vào database
-            const [newAccount] = await db('users').insert({
-                username,
-                password: hashedPassword,
+            const saltRounds = 10;
+            const hashedpassword = await bcrypt.hash(password, saltRounds);
+
+            const result = await db('users').insert({
+                userID,
+                userName,
+                password: hashedpassword,
                 email,
-            }).returning('*');
+                phoneNumber,
+            });
 
-            return newAccount;
+            return result[0];
         } catch (error) {
             throw new Error(`Failed to create account: ${error.message}`);
         }
     },
 
-    // 2. Lấy thông tin tài khoản theo ID
-    getAccountByID: async (accountID) => {
+    // 2. Lấy thông tin tài khoản theo userID
+    getAccountByID: async (userID) => {
         try {
-            const account = await db('users').where({ accountID }).first();
+            const account = await db('users').where({ userID }).first();
             if (!account) throw new Error('Account not found');
             return account;
         } catch (error) {
@@ -43,10 +47,10 @@ const accountMethods = {
     },
 
     // 4. Cập nhật thông tin tài khoản
-    updateAccountByID: async (accountID, updateData) => {
+    updateAccountByID: async (userID, updateData) => {
         try {
             const updatedAccount = await db('users')
-                .where({ accountID })
+                .where({ userID })
                 .update(updateData)
                 .returning('*');
             if (!updatedAccount.length) throw new Error('Account not found');
@@ -56,51 +60,65 @@ const accountMethods = {
         }
     },
 
-    // 5. Xóa tài khoản theo ID
-    deleteAccountByID: async (accountID) => {
+    // 5. Xóa tài khoản theo userID
+    deleteAccountByID: async (userID) => {
         try {
-            const deleted = await db('users').where({ accountID }).del();
+            const deleted = await db('users').where({ userID }).del();
             if (!deleted) throw new Error('Account not found or already deleted');
-            return `Account ${accountID} deleted successfully.`;
+            return `Account ${userID} deleted successfully.`;
         } catch (error) {
             throw new Error(`Failed to delete account: ${error.message}`);
         }
     },
 
-    // 6. Kiểm tra đăng nhập (dựa vào username và password đã hash)
-    validatePassword: async (username, inputPassword) => {
+    // 6. Kiểm tra đăng nhập (dựa vào userName và password đã hash)
+    validatepassword: async (userName, inputpassword) => {
         try {
-            // Lấy mật khẩu hash từ database dựa trên username
-            const account = await db('users').where('username', username).first();
+            // Lấy mật khẩu hash từ database dựa trên userName
+            const account = await db('users').where('userName', userName).first();
             if (!account) throw new Error('Account not found');
             // So sánh mật khẩu nhập vào với mật khẩu đã hash
-            const isMatch = (inputPassword===account.password)
-            // const isMatch = await bcrypt.compare(inputPassword, account.password);
+            const isMatch = await bcrypt.compare(inputpassword, account.password);
             if (!isMatch) throw new Error('Invalid password');
 
             return account;
         } catch (error) {
-            throw new Error(`Password validation failed: ${error.message}`);
+            throw new Error(`password validation failed: ${error.message}`);
         }
     },
+
     // Kiểm tra email tồn tại chưa
     getAccountByEmail: async (email) => {
         return await db('users').where('email', email).first();
     },
 
     // Kiểm tra phone tồn tại chưa
-    getAccountByPhone: async (phone) => {
-        return await db('users').where('phoneNumber', phone).first();
+    getAccountByPhone: async (phoneNumber) => {
+        return await db('users').where('phoneNumber', phoneNumber).first();
     },
 
     updateToken: async (account) => {
         try {
-            db('users').where('userID', account.accountID).update('tokens', account.token);
-        }
-        catch (error){
-            throw new Error(`Cant set token for user: ${error.message}`);
+            // Ensure that the account object contains userID and token
+            if (!account.userID || !account.token) {
+                throw new Error('Missing userID or token');
+            }
+
+            // Update token in the database using userID
+            const result = await db('users')
+                .where('userID', account.userID) // Use userID for the condition
+                .update('token', account.token);
+
+            // Check if any rows were affected (meaning the update was successful)
+            if (result === 0) {
+                throw new Error('Failed to update token. Account not found.');
+            }
+
+        } catch (error) {
+            throw new Error(`Failed to set token for user: ${error.message}`);
         }
     }
+
 };
 
 module.exports = accountMethods;

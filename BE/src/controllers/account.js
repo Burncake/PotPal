@@ -1,19 +1,34 @@
 const accountMethods = require('../models/account');
-const {generateToken}= require('../utils/generator');
+const { generateToken, generateID } = require('../utils/generator');
 
 const accountController = {
     // Thêm tài khoản mới
     addAccount: async (req, res) => {
         try {
-            const { username, password, email } = req.body;
+            const { userName, password, email, phoneNumber } = req.body;
 
             // Kiểm tra đầu vào
-            if (!username || !password || !email) {
-                return res.status(401).json({ status: 'error', message: 'Missing required fields.' });
+            if (!userName || !password || !email || !phoneNumber) {
+                return res.status(400).json({ status: 'error', message: 'Missing required fields.' });
             }
 
+            // Kiểm tra email hoặc số điện thoại đã tồn tại chưa
+            const existingEmail = await accountMethods.getAccountByEmail(email);
+            const existingPhone = await accountMethods.getAccountByPhone(phoneNumber);
+
+            if (existingEmail) {
+                return res.status(400).json({ status: 'error', message: 'Email is already in use.' });
+            }
+
+            if (existingPhone) {
+                return res.status(400).json({ status: 'error', message: 'Phone number is already in use.' });
+            }
+
+            // Tạo userID
+            const userID = generateID();
+
             // Thêm tài khoản
-            const newAccount = await accountMethods.addAccount(username, password, email);
+            const newAccount = await accountMethods.addAccount(userID, userName, password, email, phoneNumber);
 
             return res.status(201).json({
                 status: 'success',
@@ -31,24 +46,43 @@ const accountController = {
     // Đăng nhập tài khoản
     login: async (req, res) => {
         try {
-            const { username, password } = req.body;
-            console.log(username, password);
+            const { userName, password } = req.body;
+
             // Kiểm tra đầu vào
-            if (!username || !password) {
+            if (!userName || !password) {
                 return res.status(400).json({ status: 'error', message: 'Username and password are required.' });
             }
+
             // Kiểm tra mật khẩu
-            const account = await accountMethods.validatePassword(username, password);
-            account.token = await generateToken(account);
-            accountMethods.updateToken(account);
+            const account = await accountMethods.validatepassword(userName, password);
+
+            if (!account) {
+                return res.status(401).json({ status: 'error', message: 'Invalid credentials.' });
+            }
+
+            // Log account info and payload before generating token
+            console.log('Account data before token generation:', account);
+
+            // Tạo token
+            const tokenPayload = { userID: account.userID, userName: account.userName }; // Limit payload data
+            const token = await generateToken(tokenPayload); // Pass only necessary info
+            account.token = token;
+
+            // Log token size
+            console.log('Generated Token Size:', Buffer.byteLength(token, 'utf8'));
+
+            // Update token in database
+            await accountMethods.updateToken(account);
+
             return res.status(200).json({
                 status: 'success',
                 message: 'Login successful.',
                 data: {
                     accountID: account.accountID,
-                    username: account.username,
+                    userName: account.userName,
                     email: account.email,
-                    token: account.token
+                    phoneNumber: account.phoneNumber,
+                    token: account.token,
                 },
             });
         } catch (error) {
@@ -62,16 +96,19 @@ const accountController = {
     // Đăng ký tài khoản
     register: async (req, res) => {
         try {
-            const { username, password, email, phone } = req.body;
+            const { userName, password, email, phoneNumber } = req.body;
+
+            // Log received input
+            console.log('Received input:', { userName, password, email, phoneNumber });
 
             // Kiểm tra đầu vào
-            if (!username || !password || !email || !phone) {
+            if (!userName || !password || !email || !phoneNumber) {
                 return res.status(400).json({ status: 'error', message: 'Missing required fields.' });
             }
 
             // Kiểm tra email hoặc số điện thoại đã tồn tại chưa
             const existingEmail = await accountMethods.getAccountByEmail(email);
-            const existingPhone = await accountMethods.getAccountByPhone(phone);
+            const existingPhone = await accountMethods.getAccountByPhone(phoneNumber);
 
             if (existingEmail) {
                 return res.status(400).json({ status: 'error', message: 'Email is already in use.' });
@@ -81,13 +118,21 @@ const accountController = {
                 return res.status(400).json({ status: 'error', message: 'Phone number is already in use.' });
             }
 
-            // Thêm tài khoản mới vào database
-            const newAccount = await accountMethods.addAccount(username, password, email, phone);
+            // Tạo userID
+            const userID = generateID();
+
+            // Thêm tài khoản
+            const newAccount = await accountMethods.addAccount(userID, userName, password, email, phoneNumber);
 
             return res.status(201).json({
                 status: 'success',
                 message: 'Account registered successfully.',
-                data: { accountID: newAccount.accountID, username, email, phone },
+                data: {
+                    accountID: newAccount.accountID,
+                    userName,
+                    email,
+                    phoneNumber,
+                },
             });
         } catch (error) {
             return res.status(500).json({
@@ -100,10 +145,10 @@ const accountController = {
     // Lấy thông tin tài khoản
     getAccount: async (req, res) => {
         try {
-            const { username } = req.params;
+            const { userName } = req.params;
 
             // Truy vấn thông tin tài khoản
-            const account = await accountMethods.getAccountByUsername(username);
+            const account = await accountMethods.getAccountByUsername(userName);
 
             if (!account) {
                 return res.status(404).json({ status: 'error', message: 'Account not found.' });
@@ -113,8 +158,9 @@ const accountController = {
                 status: 'success',
                 data: {
                     accountID: account.accountID,
-                    username: account.username,
+                    userName: account.userName,
                     email: account.email,
+                    phoneNumber: account.phoneNumber,
                 },
             });
         } catch (error) {
